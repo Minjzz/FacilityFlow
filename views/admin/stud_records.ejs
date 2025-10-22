@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Records | FacilityFlow</title>
+    <link rel="icon" type="image/png" href="../../images/logo/e.png" />
+    <link rel="stylesheet" href="/css/admin/stud_records.css" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+</head>
+
+<body>
+    <nav class="site-nav">
+        <button class="sidebar-toggle">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <img src="/images/logaur.png" alt="Logo" class="header-logo" />
+                <h1 class="header-title">FacilityFlow</h1>
+                <button class="sidebar-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </header>
+
+            <div class="sidebar-content">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="/admin/dashboard" class="menu-link">
+                            <span class="material-symbols-rounded">dashboard</span>
+                            <span class="menu-label">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/facility_mgnt" class="menu-link">
+                            <span class="material-symbols-rounded">domain</span>
+                            <span class="menu-label">Facility Management</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/reservations" class="menu-link">
+                            <span class="material-symbols-rounded">event</span>
+                            <span class="menu-label">Reservation Requests</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/stud_records" class="menu-link active">
+                            <span class="material-symbols-rounded">group</span>
+                            <span class="menu-label">Student Records</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/analytics" class="menu-link">
+                            <span class="material-symbols-rounded">bar_chart</span>
+                            <span class="menu-label">Usage Analytics</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/feedbacks" class="menu-link">
+                            <span class="material-symbols-rounded">feedback</span>
+                            <span class="menu-label">Feedback Reports</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="/admin/settings" class="menu-link">
+                            <span class="material-symbols-rounded">settings</span>
+                            <span class="menu-label">Account Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <div class="dashboard-navbar">
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b>Marlon</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-photo" onclick="toggleDropdown()">
+                        <img src="../../images/profile/profile.png" alt="Profile Photo" />
+                    </div>
+                </div>
+
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#"><span class="material-symbols-rounded">person</span> Profile</a>
+                    <a href="#"><span class="material-symbols-rounded">settings</span> Settings</a>
+                    <a href="../../backend/logout.php"><span class="material-symbols-rounded">logout</span> Logout</a>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">Student Records</h1>
+                <p class="page-subtitle">Manage and track all registered students using the facility system.</p>
+            </div>
+
+            <div class="search-filter">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search student name or ID..." />
+                    <i class="fa fa-search"></i>
+                </div>
+                <div class="filter-dropdown">
+                    <select>
+                        <option>All Courses</option>
+                        <option>BSIT</option>
+                        <option>BSCS</option>
+                        <option>BSHM</option>
+                        <option>BSA</option>
+                    </select>
+                </div>
+                <div class="add-student-container" style="margin-bottom: 1.5rem;">
+                    <button id="addStudentBtn" class="add-btn">
+                        <i class="fa-solid fa-user-plus"></i> Add New Student
+                    </button>
+                </div>
+            </div>
+
+            <div class="student-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Course</th>
+                            <th>Year Level</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-001</td>
+                            <td>John Edward Tiangson</td>
+                            <td>BSIT</td>
+                            <td>3rd Year</td>
+                            <td><span class="status active">Active</span></td>
+                            <td>
+                                <button class="action-btn view">View</button>
+                                <button class="action-btn edit">Edit</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>2025-002</td>
+                            <td>Jazmine Grace Alcala</td>
+                            <td>BSHM</td>
+                            <td>2nd Year</td>
+                            <td><span class="status inactive">Inactive</span></td>
+                            <td>
+                                <button class="action-btn view">View</button>
+                                <button class="action-btn edit">Edit</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>2025-003</td>
+                            <td>Marlon Villegas</td>
+                            <td>BSCS</td>
+                            <td>4th Year</td>
+                            <td><span class="status active">Active</span></td>
+                            <td>
+                                <button class="action-btn view">View</button>
+                                <button class="action-btn edit">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Student</h2>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" name="studentId" placeholder="e.g. 2025-004" required>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="e.g. Jane Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="course">Course</label>
+                    <select id="course" name="course" required>
+                        <option value="">Select Course</option>
+                        <option>BSIT</option>
+                        <option>BSCS</option>
+                        <option>BSHM</option>
+                        <option>BSA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="yearLevel">Year Level</label>
+                    <select id="yearLevel" name="yearLevel" required>
+                        <option value="">Select Year</option>
+                        <option>1st Year</option>
+                        <option>2nd Year</option>
+                        <option>3rd Year</option>
+                        <option>4th Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+                <button type="submit" class="save-btn">Save Student</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/stud_records.js"></script>
+</body>
+
+</html>

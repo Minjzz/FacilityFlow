@@ -10,8 +10,8 @@ app.set('view engine', 'ejs');
 app.use(session({
     secret: 'facilityflow-secret', 
     resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 }
+    saveUninitialized: false
+    // cookie: { maxAge: 1000 * 60 * 60 }
 }));
 
 function isAuthenticated(req, res, next) {
@@ -43,7 +43,7 @@ app.post('/login', (req, res) => {
         if (results.length > 0) {
             const user = results[0];
 
-            req.session.user = { id: user.id, role: user.role, email: user.email, name: user.name };
+            req.session.user = { id: user.id, role: user.role, email: user.email, name: user.name, contact: user.contact };
 
             if (user.role === 'Student') {
                 res.redirect('/student/student_db?login=success');
@@ -78,6 +78,43 @@ app.get('/admin/dashboard', isAuthenticated, (req, res) => {
     const success = req.query.login === 'success';
     res.render('admin/dashboard', { success, user: req.session.user });
 });
+
+app.get('/admin/facility_mgnt', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/facility_mgnt', { success, user: req.session.user });
+});
+
+app.get('/admin/reservations', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/reservations', { success, user: req.session.user });
+});
+
+app.get('/admin/stud_records', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/stud_records', { success, user: req.session.user });
+});
+
+app.get('/admin/analytics', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/analytics', { success, user: req.session.user });
+});
+
+app.get('/admin/feedbacks', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/feedbacks', { success, user: req.session.user });
+});
+
+app.get('/admin/settings', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
+    const success = req.query.login === 'success';
+    res.render('admin/settings', { success, user: req.session.user });
+});
+
 
 //Students
 app.get('/student/student_db', isAuthenticated, (req, res) => {

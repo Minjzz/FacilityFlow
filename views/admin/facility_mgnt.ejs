@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facility Management | FacilityFlow</title>
+    <link rel="icon" type="image/png" href="../../images/logo/e.png" />
+    <link rel="stylesheet" href="/css/admin/facility_mgnt.css" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+</head>
+
+<body>
+    <nav class="site-nav">
+        <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+    </nav>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <img src="/images/logaur.png" alt="Logo" class="header-logo">
+                <h1 class="header-title">FacilityFlow</h1>
+                <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+            </header>
+
+            <div class="sidebar-content">
+                <ul class="menu-list">
+                    <li><a href="/admin/dashboard" class="menu-link"><span
+                                class="material-symbols-rounded">dashboard</span><span
+                                class="menu-label">Dashboard</span></a></li>
+                    <li><a href="/admin/facility_mgnt" class="menu-link active"><span
+                                class="material-symbols-rounded">domain</span><span class="menu-label">Facility
+                                Management</span></a></li>
+                    <li><a href="/admin/reservations" class="menu-link"><span
+                                class="material-symbols-rounded">event</span><span class="menu-label">Reservation
+                                Requests</span></a></li>
+                    <li><a href="/admin/stud_records" class="menu-link"><span
+                                class="material-symbols-rounded">group</span><span class="menu-label">Student
+                                Records</span></a></li>
+                    <li><a href="/admin/analytics" class="menu-link"><span
+                                class="material-symbols-rounded">bar_chart</span><span class="menu-label">Usage
+                                Analytics</span></a></li>
+                    <li><a href="/admin/feedbacks" class="menu-link"><span
+                                class="material-symbols-rounded">feedback</span><span class="menu-label">Feedback
+                                Reports</span></a></li>
+                    <li><a href="/admin/settings" class="menu-link"><span
+                                class="material-symbols-rounded">settings</span><span class="menu-label">Account
+                                Settings</span></a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-navbar">
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b>Marlon</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-photo" onclick="toggleDropdown()">
+                        <img src="../../images/profile/profile.png" alt="Profile Photo">
+                    </div>
+                </div>
+
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#"><span class="material-symbols-rounded">person</span> Profile</a>
+                    <a href="#"><span class="material-symbols-rounded">settings</span> Settings</a>
+                    <a href="../../backend/logout.php"><span class="material-symbols-rounded">logout</span> Logout</a>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">Facility Management</h1>
+                <p class="page-subtitle">View, add, and manage all facilities in the system.</p>
+            </div>
+
+            <div class="controls">
+                <select>
+                    <option>All Types</option>
+                    <option>Laboratory</option>
+                    <option>Library</option>
+                    <option>Study Room</option>
+                </select>
+                <button class="add-btn"><span class="material-symbols-rounded">add</span> Add Facility</button>
+            </div>
+
+            <div class="facility-grid">
+                <div class="facility-card">
+                    <img src="/images/lab.jpg" class="facility-img" alt="Computer Lab" />
+                    <div class="facility-info">
+                        <h3>Computer Laboratory</h3>
+                        <p>Type: Laboratory</p>
+                        <p>Capacity: 40 Students</p>
+                        <span class="status available">Available</span>
+                    </div>
+                </div>
+
+                <div class="facility-card">
+                    <img src="/images/library.jpg" class="facility-img" alt="Library" />
+                    <div class="facility-info">
+                        <h3>University Library</h3>
+                        <p>Type: Library</p>
+                        <p>Capacity: 80 Students</p>
+                        <span class="status available">Available</span>
+                    </div>
+                </div>
+
+                <div class="facility-card">
+                    <img src="/images/studyroom.jpg" class="facility-img" alt="Study Room" />
+                    <div class="facility-info">
+                        <h3>Study Room A</h3>
+                        <p>Type: Study Room</p>
+                        <p>Capacity: 10 Students</p>
+                        <span class="status unavailable">Unavailable</span>
+                    </div>
+                </div>
+
+                <div class="facility-card">
+                    <img src="/images/gymnasium.jpg" class="facility-img" alt="Gym" />
+                    <div class="facility-info">
+                        <h3>Campus Gym</h3>
+                        <p>Type: Sports Facility</p>
+                        <p>Capacity: 30 Students</p>
+                        <span class="status available">Available</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 2rem;">Facility Records</h2>
+            <table class="facility-table">
+                <thead>
+                    <tr>
+                        <th>Facility Name</th>
+                        <th>Type</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Computer Laboratory</td>
+                        <td>Laboratory</td>
+                        <td>40</td>
+                        <td><span class="status available">Available</span></td>
+                        <td><button class="action-btn">Edit</button></td>
+                    </tr>
+                    <tr>
+                        <td>University Library</td>
+                        <td>Library</td>
+                        <td>80</td>
+                        <td><span class="status available">Available</span></td>
+                        <td><button class="action-btn">Edit</button></td>
+                    </tr>
+                    <tr>
+                        <td>Study Room A</td>
+                        <td>Study Room</td>
+                        <td>10</td>
+                        <td><span class="status unavailable">Unavailable</span></td>
+                        <td><button class="action-btn">Edit</button></td>
+                    </tr>
+                    <tr>
+                        <td>Campus Gym</td>
+                        <td>Sports Facility</td>
+                        <td>30</td>
+                        <td><span class="status available">Available</span></td>
+                        <td><button class="action-btn">Edit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
