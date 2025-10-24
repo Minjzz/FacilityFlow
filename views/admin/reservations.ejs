@@ -92,7 +92,65 @@
                         <option value="study">Study Room</option>
                     </select>
                 </div>
-                <button class="add-btn"><i class="fa-solid fa-plus"></i> New Reservation</button>
+                <button class="add-btn" data-modal="newReservation"><i class="fa-solid fa-plus"></i> New Reservation</button>
+            </div>
+
+            <div class="modal" id="newReservationModal" aria-hidden="true">
+                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="newReservationTitle">
+                    <div class="modal-header">
+                        <h3 id="newReservationTitle">New Reservation Request</h3>
+                        <button class="close-modal" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newReservationForm">
+                            <div class="form-group">
+                                <label for="studentName">Student Name</label>
+                                <input type="text" id="studentName" name="studentName" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reserveFacility">Facility</label>
+                                <select id="reserveFacility" name="reserveFacility" required>
+                                    <option value="">Select Facility</option>
+                                    <option value="Library">Library</option>
+                                    <option value="Computer Lab">Computer Lab</option>
+                                    <option value="Study Room A">Study Room A</option>
+                                    <option value="Campus Gym">Campus Gym</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reserveDate">Date</label>
+                                <input type="date" id="reserveDate" name="reserveDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="startTime">Start Time</label>
+                                <input type="time" id="startTime" name="startTime" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="endTime">End Time</label>
+                                <input type="time" id="endTime" name="endTime" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendees">Number of Attendees</label>
+                                <input type="number" id="attendees" name="attendees" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="purpose">Purpose</label>
+                                <input type="text" id="purpose" name="purpose" required>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn-secondary close-modal">Cancel</button>
+                                <button type="submit" class="btn-primary">Submit Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="recent_order" style="margin-top: 2rem;">
@@ -109,30 +167,29 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <% reservations.forEach(reservation => { %>
                         <tr>
-                            <td>#R001</td>
-                            <td>John Dela Cruz</td>
-                            <td>Library</td>
-                            <td>2025-10-22</td>
-                            <td>1:00 PM - 3:00 PM</td>
-                            <td><span class="status pending">Pending</span></td>
+                            <td><%= reservation.id %></td>
+                            <td><%= reservation.student_name %></td>
+                            <td><%= reservation.type %></td>
+                            <td><%= reservation.date.toISOString().split('T')[0] %></td>
+                            <td><%= reservation.time %></td>
                             <td>
-                                <button class="approve-btn"><i class="fa-solid fa-check"></i></button>
-                                <button class="decline-btn"><i class="fa-solid fa-times"></i></button>
+                                <% if (reservation.status === 'Pending') { %>
+                                    <span class="badge bg-warning text-dark"><%= reservation.status %></span>
+                                <% } else if (reservation.status === 'Approved') { %>
+                                    <span class="badge bg-success"><%= reservation.status %></span>
+                                <% } else if (reservation.status === 'Rejected') { %>
+                                    <span class="badge bg-danger"><%= reservation.status %></span>
+                                <% } else if (reservation.status === 'Cancelled') { %>
+                                    <span class="badge bg-secondary"><%= reservation.status %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">View</button>
                             </td>
                         </tr>
-                        <tr>
-                            <td>#R002</td>
-                            <td>Maria Santos</td>
-                            <td>Computer Lab</td>
-                            <td>2025-10-23</td>
-                            <td>9:00 AM - 11:00 AM</td>
-                            <td><span class="status approved">Approved</span></td>
-                            <td>
-                                <button class="approve-btn" disabled><i class="fa-solid fa-check"></i></button>
-                                <button class="decline-btn"><i class="fa-solid fa-times"></i></button>
-                            </td>
-                        </tr>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -140,6 +197,7 @@
     </div>
 
     <script src="/js/script.js"></script>
+    <script src="/js/reservations.js"></script>
 
 </body>
 

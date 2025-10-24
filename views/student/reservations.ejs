@@ -45,20 +45,34 @@
           </tr>
         </thead>
         <tbody>
+          <% bookings.forEach(booking => { %>
           <tr>
-            <td>Library</td>
-            <td>2025-10-22</td>
-            <td>10:00 AM - 12:00 NN</td>
-            <td><span class="badge bg-success">Active</span></td>
-            <td><button class="btn btn-sm btn-danger">Cancel</button></td>
+            <td><%= booking.type %></td>
+            <td><%= booking.date.toISOString().split('T')[0] %></td>
+            <td><%= booking.time %></td>
+            <td>
+              <% if (booking.status === 'Pending') { %>
+                <span class="badge bg-warning text-dark"><%= booking.status %></span>
+              <% } else if (booking.status === 'Approved') { %>
+                <span class="badge bg-success"><%= booking.status %></span>
+              <% } else if (booking.status === 'Rejected') { %>
+                <span class="badge bg-danger"><%= booking.status %></span>
+              <% } else if (booking.status === 'Cancelled') { %>
+                <span class="badge bg-secondary"><%= booking.status %></span>
+              <% } %>
+            </td>
+            <td>
+              <% if (booking.status === 'Pending') { %>
+              <form action="/cancelReservation" method="POST" onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                <input type="hidden" name="reservation_id" value="<%= booking.id %>">
+                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+              </form>
+              <% } else { %>
+              <!-- No action for non-pending statuses -->
+              <% } %>
+            </td>
           </tr>
-          <tr>
-            <td>Labs</td>
-            <td>2025-10-20</td>
-            <td>8:00 AM - 10:00 AM</td>
-            <td><span class="badge bg-secondary">Completed</span></td>
-            <td>-</td>
-          </tr>
+          <% }); %>
         </tbody>
       </table>
     </div>

@@ -128,11 +128,68 @@
                 </div>
             </div>
 
+            <div id="addStudentModal" class="modal" aria-hidden="true">
+                <div class="modal-content">
+                    <span class="close" role="button" aria-label="Close">&times;</span>
+                    <h2>Add New Student</h2>
+                    <form id="addStudentForm" action="/addStudent" method="POST">
+                        <div class="form-group">
+                            <label for="studentId">Student ID</label>
+                            <input type="text" id="studentId" name="id_num" placeholder="2025-023414" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="name" placeholder="Jane Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="course">Course</label>
+                            <select id="course" name="course" required>
+                                <option value="">Select Course</option>
+                                <option>BSIT</option>
+                                <option>BSCS</option>
+                                <option>BSHM</option>
+                                <option>BSA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="yearLevel">Year Level</label>
+                            <select id="yearLevel" name="yearLevel" required>
+                                <option value="">Select Year</option>
+                                <option>1st Year</option>
+                                <option>2nd Year</option>
+                                <option>3rd Year</option>
+                                <option>4th Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="text" id="fullName" name="email" placeholder="you@phinmaed.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" placeholder="" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">Contact Number</label>
+                            <input type="number" id="contact" name="contact" placeholder="" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="save-btn">Save Student</button>
+                    </form>
+                </div>
+            </div>
+
             <div class="student-table">
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>ID Number</th>
                             <th>Full Name</th>
                             <th>Course</th>
                             <th>Year Level</th>
@@ -141,89 +198,25 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <% students.forEach(results => { %>
                         <tr>
-                            <td>2025-001</td>
-                            <td>John Edward Tiangson</td>
-                            <td>BSIT</td>
-                            <td>3rd Year</td>
-                            <td><span class="status active">Active</span></td>
+                            <td><%= results.id_num %></td>
+                            <td><%= results.name %></td>
+                            <td><%= results.course %></td>
+                            <td><%= results.yearLevel %></td>
                             <td>
-                                <button class="action-btn view">View</button>
-                                <button class="action-btn edit">Edit</button>
+                                <span class="status <%= (results.status || '').toString().toLowerCase().replace(/\s+/g, '-') %>">
+                                    <%= results.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
                             </td>
                         </tr>
-
-                        <tr>
-                            <td>2025-002</td>
-                            <td>Jazmine Grace Alcala</td>
-                            <td>BSHM</td>
-                            <td>2nd Year</td>
-                            <td><span class="status inactive">Inactive</span></td>
-                            <td>
-                                <button class="action-btn view">View</button>
-                                <button class="action-btn edit">Edit</button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>2025-003</td>
-                            <td>Marlon Villegas</td>
-                            <td>BSCS</td>
-                            <td>4th Year</td>
-                            <td><span class="status active">Active</span></td>
-                            <td>
-                                <button class="action-btn view">View</button>
-                                <button class="action-btn edit">Edit</button>
-                            </td>
-                        </tr>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <div id="addStudentModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Add New Student</h2>
-            <form id="addStudentForm">
-                <div class="form-group">
-                    <label for="studentId">Student ID</label>
-                    <input type="text" id="studentId" name="studentId" placeholder="e.g. 2025-004" required>
-                </div>
-                <div class="form-group">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="e.g. Jane Doe" required>
-                </div>
-                <div class="form-group">
-                    <label for="course">Course</label>
-                    <select id="course" name="course" required>
-                        <option value="">Select Course</option>
-                        <option>BSIT</option>
-                        <option>BSCS</option>
-                        <option>BSHM</option>
-                        <option>BSA</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="yearLevel">Year Level</label>
-                    <select id="yearLevel" name="yearLevel" required>
-                        <option value="">Select Year</option>
-                        <option>1st Year</option>
-                        <option>2nd Year</option>
-                        <option>3rd Year</option>
-                        <option>4th Year</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" name="status" required>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-                <button type="submit" class="save-btn">Save Student</button>
-            </form>
         </div>
     </div>
 
