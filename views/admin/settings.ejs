@@ -27,31 +27,38 @@
 
             <div class="sidebar-content">
                 <ul class="menu-list">
-                    <li><a href="/admin/dashboard" class="menu-link"><span class="material-symbols-rounded">dashboard</span>
+                    <li><a href="/admin/dashboard" class="menu-link"><span
+                                class="material-symbols-rounded">dashboard</span>
                             <span class="menu-label">Dashboard</span>
                         </a>
                     </li>
-                    <li><a href="/admin/facility_mgnt" class="menu-link"><span class="material-symbols-rounded">domain</span>
+                    <li><a href="/admin/facility_mgnt" class="menu-link"><span
+                                class="material-symbols-rounded">domain</span>
                             <span class="menu-label">Facility Management</span>
                         </a>
                     </li>
-                    <li><a href="/admin/reservations" class="menu-link"><span class="material-symbols-rounded">event</span>
+                    <li><a href="/admin/reservations" class="menu-link"><span
+                                class="material-symbols-rounded">event</span>
                             <span class="menu-label">Reservation Requests</span>
                         </a>
                     </li>
-                    <li><a href="/admin/stud_records" class="menu-link"><span class="material-symbols-rounded">group</span>
+                    <li><a href="/admin/stud_records" class="menu-link"><span
+                                class="material-symbols-rounded">group</span>
                             <span class="menu-label">Student Records</span>
                         </a>
                     </li>
-                    <li><a href="/admin/analytics" class="menu-link"><span class="material-symbols-rounded">bar_chart</span>
+                    <li><a href="/admin/analytics" class="menu-link"><span
+                                class="material-symbols-rounded">bar_chart</span>
                             <span class="menu-label">Usage Analytics</span>
                         </a>
                     </li>
-                    <li><a href="/admin/feedbacks" class="menu-link"><span class="material-symbols-rounded">feedback</span>
+                    <li><a href="/admin/feedbacks" class="menu-link"><span
+                                class="material-symbols-rounded">feedback</span>
                             <span class="menu-label">Feedback Reports</span>
                         </a>
                     </li>
-                    <li><a href="/admin/settings" class="menu-link active"><span class="material-symbols-rounded">settings</span>
+                    <li><a href="/admin/settings" class="menu-link active"><span
+                                class="material-symbols-rounded">settings</span>
                             <span class="menu-label">Account Settings</span>
                         </a>
                     </li>
@@ -87,18 +94,18 @@
                 <div class="settings-row">
                     <section class="settings-section">
                         <h2>Profile Information</h2>
-                        <form class="settings-form">
+                        <form class="settings-form" id="profileForm" action="/admin/updateProfile" method="POST">
                             <div class="form-group">
                                 <label>Full Name</label>
-                                <input type="text" value="<%= user.name %>">
+                                <input type="text" name="name" value="<%= user.name %>">
                             </div>
                             <div class="form-group">
                                 <label>Email Address</label>
-                                <input type="email" value="<%= user.email %>">
+                                <input type="email" name="email" value="<%= user.email %>">
                             </div>
                             <div class="form-group">
                                 <label>Contact Number</label>
-                                <input type="text" value="+63 <%= user.contact %>">
+                                <input type="text" name="contact" placeholder="+63 " value="<%= user.contact %>">
                             </div>
                             <button type="submit" class="save-btn">Save Changes</button>
                         </form>
@@ -106,22 +113,23 @@
 
                     <section class="settings-section">
                         <h2>Change Password</h2>
-                        <form class="settings-form">
+                        <form class="settings-form" id="passwordForm" action="/admin/changePassword" method="POST">
                             <div class="form-group">
                                 <label>Current Password</label>
-                                <input type="password" placeholder="Enter current password">
+                                <input type="password" name="currentPassword" placeholder="Enter current password">
                             </div>
                             <div class="form-group">
                                 <label>New Password</label>
-                                <input type="password" placeholder="Enter new password">
+                                <input type="password" name="newPassword" placeholder="Enter new password">
                             </div>
                             <div class="form-group">
                                 <label>Confirm New Password</label>
-                                <input type="password" placeholder="Re-enter new password">
+                                <input type="password" name="confirmPassword" placeholder="Re-enter new password">
                             </div>
                             <button type="submit" class="save-btn">Update Password</button>
                         </form>
                     </section>
+
                 </div>
 
                 <div class="settings-row">
@@ -145,6 +153,20 @@
     </div>
 
     <script src="/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <% if (alert) { %>
+        <script>
+            Swal.fire({
+                icon: '<%= alert.type %>',
+                title: '<%= alert.title %>',
+                text: '<%= alert.message %>',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        </script>
+        <% } %>
+        </script>
 </body>
 
 </html>

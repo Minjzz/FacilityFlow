@@ -42,8 +42,12 @@
                 <div class="d-flex align-items-center gap-3 mb-md-0 mb-3">
                     <img src="/images/default-profile.png" alt="Profile Picture" class="profile-pic rounded-circle">
                     <div>
-                        <h5 class="mb-0 fw-semibold"><%= user.name %></h5>
-                        <p class="text-muted mb-0"><%= user.role %>, BS Information Technology</p>
+                        <h5 class="mb-0 fw-semibold">
+                            <%= user.name %>
+                        </h5>
+                        <p class="text-muted mb-0">
+                            <%= user.role %>, BS Information Technology
+                        </p>
                     </div>
                 </div>
                 <button class="btn btn-logout" id="logoutBtn">
@@ -105,7 +109,7 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Date</label>
-                            <input type="date" class="form-control" id="date" name="date"/>
+                            <input type="date" class="form-control" id="date" name="date" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Time Slot</label>
@@ -143,47 +147,58 @@
                     </thead>
                     <tbody id="bookingList">
                         <% bookings.forEach(function(booking) { %>
-                            <% if (booking.status === 'Pending' || booking.status === 'Approved') { %>
+                            <% if (booking.status==='Pending' || booking.status==='Approved' ) { %>
                                 <tr>
-                                    <td><%= booking.type %></td>
-                                    <td><%= booking.date.toISOString().split('T')[0] %></td>
-                                    <td><%= booking.time %></td>
                                     <td>
-                                        <% if (booking.status === 'Pending') { %>
-                                            <span class="badge bg-warning text-dark"><%= booking.status %></span>
-                                        <% } else if (booking.status === 'Approved') { %>
-                                            <span class="badge bg-success"><%= booking.status %></span>
-                                        <% } %>
+                                        <%= booking.type %>
                                     </td>
                                     <td>
-                                        <% if (booking.status === 'Pending') { %>
-                                            <form action="/cancelReservation" method="POST" onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                                        <%= booking.date.toISOString().split('T')[0] %>
+                                    </td>
+                                    <td>
+                                        <%= booking.time %>
+                                    </td>
+                                    <td>
+                                        <% if (booking.status==='Pending' ) { %>
+                                            <span class="badge bg-warning text-dark">
+                                                <%= booking.status %>
+                                            </span>
+                                            <% } else if (booking.status==='Approved' ) { %>
+                                                <span class="badge bg-success">
+                                                    <%= booking.status %>
+                                                </span>
+                                                <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (booking.status==='Pending' ) { %>
+                                            <form action="/cancelReservation" method="POST"
+                                                onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
                                                 <input type="hidden" name="reservation_id" value="<%= booking.id %>">
                                                 <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                                             </form>
-                                        <% } else { %>
-                                            N/A
-                                        <% } %>
+                                            <% } else { %>
+                                                N/A
+                                                <% } %>
                                     </td>
                                 </tr>
-                            <% } %>
-                        <% }); %>
+                                <% } %>
+                                    <% }); %>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- FEEDBACK -->
         <section id="feedback" class="mb-5">
             <div class="section-header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="fw-semibold">Submit Feedback</h3>
                 <a href="/student/feedbacks" class="btn btn-history">Feedback History</a>
             </div>
             <div class="card p-4">
-                <form>
+                <form action="/student/addFeedback" method="POST">
                     <div class="mb-3">
-                        <label class="form-label">Rate Your Experience</label>
-                        <select class="form-select">
+                        <label for="rating" class="form-label">Rate Your Experience</label>
+                        <select id="rating" name="rating" class="form-select" required>
+                            <option value="" disabled selected>Select rating</option>
                             <option value="5">5 Stars</option>
                             <option value="4">4 Stars</option>
                             <option value="3">3 Stars</option>
@@ -191,14 +206,46 @@
                             <option value="1">1 Star</option>
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Comments</label>
-                        <textarea class="form-control" rows="3" placeholder="Write your feedback..."></textarea>
+                        <label for="service" class="form-label">Service Quality</label>
+                        <select id="service" name="service_quality" class="form-select" required>
+                            <option value="" disabled selected>Select service quality</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Average">Average</option>
+                            <option value="Poor">Poor</option>
+                        </select>
                     </div>
-                    <button class="btn btn-green">Submit</button>
+
+                    <div class="mb-3">
+                        <label for="cleanliness" class="form-label">Facility Cleanliness</label>
+                        <select id="cleanliness" name="facility_cleanliness" class="form-select" required>
+                            <option value="" disabled selected>Select cleanliness level</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Average">Average</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Comments</label>
+                        <textarea id="comments" name="comments" class="form-control" rows="3"
+                            placeholder="Write your feedback..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="suggestions" class="form-label">Suggestions for Improvement</label>
+                        <textarea id="suggestions" name="suggestions" class="form-control" rows="2"
+                            placeholder="Your suggestions..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-green">Submit Feedback</button>
                 </form>
             </div>
         </section>
+
 
     </div>
 
@@ -207,43 +254,44 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <% if (success) { %>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <% if (alert) { %>
         <script>
             Swal.fire({
-                icon: 'success',
-                title: 'Welcome Back!',
-                text: 'You have logged in successfully.',
+                icon: '<%= alert.type %>',
+                title: '<%= alert.title %>',
+                text: '<%= alert.message %>',
                 timer: 1500,
                 showConfirmButton: false
             });
         </script>
         <% } %>
 
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.getElementById("logoutBtn").addEventListener("click", function () {
-                Swal.fire({
-                    title: "Are you sure you want to log out?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#2e8b57",
-                    cancelButtonColor: "#aaa",
-                    confirmButtonText: "Yes, log out"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                    window.location.href = "/logout";
-                }
-            });
-        });
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.getElementById("logoutBtn").addEventListener("click", function () {
+                    Swal.fire({
+                        title: "Are you sure you want to log out?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#2e8b57",
+                        cancelButtonColor: "#aaa",
+                        confirmButtonText: "Yes, log out"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/logout";
+                        }
+                    });
+                });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const dateInput = document.getElementById("date");
-            const today = new Date().toISOString().split("T")[0];
-            dateInput.value = today;
-            dateInput.min = today;
-        });
-    </script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const dateInput = document.getElementById("date");
+                    const today = new Date().toISOString().split("T")[0];
+                    dateInput.value = today;
+                    dateInput.min = today;
+                });
+            </script>
 </body>
 
 </html>

@@ -81,84 +81,78 @@
             <div class="feedback-grid">
                 <div class="feedback-card">
                     <h3><i class="fa-solid fa-face-smile"></i> Positive Feedback</h3>
-                    <p>Students appreciated the faster booking confirmation and the improved facility cleanliness.</p>
-                    <small>Last updated: Oct 22, 2025</small>
+                    <p>
+                        <%= stats.positiveCount %> positive feedback(s) received.
+                    </p>
+                    <small>Last updated: <%= new Date().toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                            year: 'numeric' }) %></small>
                 </div>
-
+            
                 <div class="feedback-card">
                     <h3><i class="fa-solid fa-face-frown"></i> Negative Feedback</h3>
-                    <p>Some users mentioned that the app sometimes lags when loading facility details.</p>
-                    <small>Last updated: Oct 21, 2025</small>
+                    <p>
+                        <%= stats.negativeCount %> negative feedback(s) reported.
+                    </p>
+                    <small>Last updated: <%= new Date().toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                            year: 'numeric' }) %></small>
                 </div>
-
+            
                 <div class="feedback-card">
                     <h3><i class="fa-solid fa-lightbulb"></i> Suggestions</h3>
-                    <p>Students recommended adding push notifications and a dark mode for better accessibility.</p>
-                    <small>Last updated: Oct 20, 2025</small>
+                    <p>
+                        <%= stats.suggestionsCount %> suggestion(s) provided by students.
+                    </p>
+                    <small>Last updated: <%= new Date().toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                            year: 'numeric' }) %></small>
                 </div>
-
+            
                 <div class="feedback-card">
                     <h3><i class="fa-solid fa-chart-line"></i> Insights</h3>
-                    <p>Overall satisfaction increased by 25% this month, especially among frequent facility users.</p>
-                    <small>Last updated: Oct 22, 2025</small>
+                    <p>Average rating: <%= stats.insights %> ⭐</p>
+                    <small>Last updated: <%= new Date().toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                            year: 'numeric' }) %></small>
                 </div>
             </div>
 
             <div class="reports-table">
-                <!-- <h2>All Feedback Reports</h2> -->
+                <h2>All Feedback Reports</h2>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Student Name</th>
-                                <th>Facility</th>
-                                <th>Type</th>
-                                <th>Message</th>
+                                <th>Rating</th>
+                                <th>Service Quality</th>
+                                <th>Facility Cleanliness</th>
+                                <th>Comments</th>
+                                <th>Suggestions</th>
                                 <th>Date Submitted</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>John Dela Cruz</td>
-                                <td>Computer Lab</td>
-                                <td>Positive</td>
-                                <td>The booking process was quick and easy.</td>
-                                <td>Oct 20, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Ana Santos</td>
-                                <td>Library</td>
-                                <td>Negative</td>
-                                <td>Approval took too long. Please improve response time.</td>
-                                <td>Oct 19, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Mark Reyes</td>
-                                <td>Study Room</td>
-                                <td>Suggestion</td>
-                                <td>Add a reminder before booking time.</td>
-                                <td>Oct 18, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Rica Cruz</td>
-                                <td>Computer Lab</td>
-                                <td>Positive</td>
-                                <td>Very smooth interface after the update!</td>
-                                <td>Oct 17, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>James Tan</td>
-                                <td>Library</td>
-                                <td>Insight</td>
-                                <td>Peak times should display estimated waiting time.</td>
-                                <td>Oct 16, 2025</td>
-                            </tr>
+                            <% if (feedbacks.length > 0) { %>
+                                <% feedbacks.forEach((fb, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td><%= fb.student_name %></td>
+                                        <td>
+                                            <% for (let i = 0; i < fb.rating; i++) { %>
+                                                ⭐
+                                            <% } %>
+                                        </td>
+                                        <td><%= fb.service_quality || 'N/A' %></td>
+                                        <td><%= fb.facility_cleanliness || 'General' %></td>
+                                        <td><%= fb.comments %></td>
+                                        <td><%= fb.suggestions %></td>
+                                        <td><%= new Date(fb.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" style="text-align:center;">No feedback found</td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>

@@ -35,30 +35,40 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Facility</th>
                         <th>Rating</th>
+                        <th>Service Quality</th>
+                        <th>Facility Cleanliness</th>
                         <th>Comments</th>
+                        <th>Suggestion</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>2025-10-22</td>
-                        <td>Library</td>
-                        <td>⭐⭐⭐⭐⭐</td>
-                        <td>Great experience, very clean.</td>
-                    </tr>
-                    <tr>
-                        <td>2025-10-20</td>
-                        <td>Labs</td>
-                        <td>⭐⭐⭐</td>
-                        <td>Equipment working but limited space.</td>
-                    </tr>
+                    <% if (feedbacks && feedbacks.length > 0) { %>
+                        <% feedbacks.forEach(feedback => { %>
+                            <tr>
+                                <td><%= feedback.created_at.toISOString().split('T')[0] %></td>
+                                <td>
+                                    <% for (let i = 0; i < feedback.rating; i++) { %>
+                                        ⭐
+                                    <% } %>
+                                </td>
+                                <td><%= feedback.service_quality %></td>
+                                <td><%= feedback.facility_cleanliness %></td>
+                                <td><%= feedback.comments %></td>
+                                <td><%= feedback.suggestions %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4">No feedback submitted yet.</td>
+                        </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <footer>
+    <footer class="text-center py-3">
         © 2025 FacilityFlow | PHINMA University of Iloilo
     </footer>
 

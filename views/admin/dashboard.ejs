@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard</title>
     <link rel="icon" type="image/png" href="../../images/logo/e.png">
     <link rel="stylesheet" href="/css/admin/dashboard.css">
@@ -118,6 +118,7 @@
 
             <div class="page-header">
                 <h1 class="page-title">Dashboard</h1>
+                <p class="subtitle">Overview of facilities, reservations, and student activities.</p>
             </div>
 
             <div class="insights">
@@ -125,7 +126,7 @@
                     <span class="material-symbols-rounded insight-icon" style="color: #27ae60;">dashboard</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Total Facilities</h3>
-                        <p class="insight-value">12</p>
+                        <p class="insight-value"><%= totalFacilities %></p>
                     </div>
                 </div>
 
@@ -133,7 +134,7 @@
                     <span class="material-symbols-rounded insight-icon" style="color: #2980b9;">event_available</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Today's Reservations</h3>
-                        <p class="insight-value">34</p>
+                        <p class="insight-value"><%= reservations.length %></p>
                     </div>
                 </div>
 
@@ -141,7 +142,7 @@
                     <span class="material-symbols-rounded insight-icon" style="color: #f39c12;">groups</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Registered Students</h3>
-                        <p class="insight-value">256</p>
+                        <p class="insight-value"><%= totalStudents %></p>
                     </div>
                 </div>
 
@@ -149,7 +150,7 @@
                     <span class="material-symbols-rounded insight-icon" style="color: #e74c3c;">feedback</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Feedback Reports</h3>
-                        <p class="insight-value">18</p>
+                        <p class="insight-value"><%= totalFeedbacks %></p>
                     </div>
                 </div>
             </div>
@@ -165,38 +166,25 @@
                                     <th>Student Name</th>
                                     <th>Facility</th>
                                     <th>Date</th>
+                                    <th>Time</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>#R101</td>
-                                    <td>Juan Dela Cruz</td>
-                                    <td>Library</td>
-                                    <td>2025-10-23</td>
-                                    <td><span class="status approved">Approved</span></td>
-                                </tr>
-                                <tr>
-                                    <td>#R102</td>
-                                    <td>Maria Santos</td>
-                                    <td>Computer Lab</td>
-                                    <td>2025-10-23</td>
-                                    <td><span class="status pending">Pending</span></td>
-                                </tr>
-                                <tr>
-                                    <td>#R103</td>
-                                    <td>Jose Ramirez</td>
-                                    <td>Study Room</td>
-                                    <td>2025-10-22</td>
-                                    <td><span class="status approved">Approved</span></td>
-                                </tr>
-                                <tr>
-                                    <td>#R104</td>
-                                    <td>Anna Cruz</td>
-                                    <td>Library</td>
-                                    <td>2025-10-21</td>
-                                    <td><span class="status cancelled">Cancelled</span></td>
-                                </tr>
+                                <% reservations.slice(0, 4).forEach(reservation => { %>
+                                    <tr>
+                                        <td><%= reservation.id %></td>
+                                        <td><%= reservation.student_name %></td>
+                                        <td><%= reservation.type %></td>
+                                        <td><%= reservation.date.toISOString().split('T')[0] %></td>
+                                        <td><%= reservation.time %></td>
+                                        <td>
+                                            <span class="status <%= (reservation.status || '').toString().toLowerCase().replace(/\s+/g, '-') %>">
+                                                <%= reservation.status %>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }); %>
                             </tbody>
                         </table>
                     </div>
@@ -228,6 +216,24 @@
 
     <script src="/js/script.js"></script>
     <script src="/js/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script type="text/javascript">
+        window.facilityStats = JSON.parse('<%- JSON.stringify(facilityStats || []) %>');
+        window.dailyStats = JSON.parse('<%- JSON.stringify(dailyStats || []) %>');
+    </script>
+
+    <% if (alert) { %>
+        <script>
+            Swal.fire({
+                icon: '<%= alert.type %>',
+                title: '<%= alert.title %>',
+                text: '<%= alert.message %>',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        </script>
+    <% } %>
 
 </body>
 

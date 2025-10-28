@@ -222,6 +222,19 @@
 
     <script src="/js/script.js"></script>
     <script src="/js/stud_records.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <% if (alert) { %>
+        <script>
+            Swal.fire({
+                icon: '<%= alert.type %>',
+                title: '<%= alert.title %>',
+                text: '<%= alert.message %>',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        </script>
+    <% } %>
 </body>
 
 </html>
