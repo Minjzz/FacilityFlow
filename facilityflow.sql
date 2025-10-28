@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 25, 2025 at 04:05 AM
+-- Generation Time: Oct 28, 2025 at 06:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -46,7 +46,7 @@ CREATE TABLE `accounts` (
 
 INSERT INTO `accounts` (`id`, `id_num`, `name`, `course`, `yearLevel`, `email`, `contact`, `password`, `role`, `status`) VALUES
 (1, '2324-033562', 'Sonny Wagas', 'BSIT', '3rd Year', 'sonny@phinmaed.com', 447483647, 'sonny123', 'Student', 'Active'),
-(2, '2324-033562', 'Marlon Villegas', '', '', 'marlon@phinmaed.com', 497680949, 'marlon123', 'Admin', ''),
+(2, '2324-033562', 'Marlon Villegas', '', '', 'marlon@phinmaed.com', 63, 'marlon123', 'Admin', ''),
 (3, '2324-012345', 'Kurth Zereso', 'BSIT', '2nd Year', 'kuja@phinmaed.com', 2147483647, 'kurth123', 'Student', 'Active');
 
 -- --------------------------------------------------------
@@ -79,6 +79,30 @@ INSERT INTO `facilities` (`id`, `name`, `type`, `capacity`, `status`, `image`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `feedbacks`
+--
+
+CREATE TABLE `feedbacks` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` tinyint(4) NOT NULL,
+  `service_quality` enum('Excellent','Good','Average','Poor') NOT NULL,
+  `facility_cleanliness` enum('Excellent','Good','Average','Poor') NOT NULL,
+  `comments` text NOT NULL,
+  `suggestions` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `feedbacks`
+--
+
+INSERT INTO `feedbacks` (`id`, `user_id`, `rating`, `service_quality`, `facility_cleanliness`, `comments`, `suggestions`, `created_at`) VALUES
+(1, 1, 5, 'Excellent', 'Good', 'asd', 'asd', '2025-10-28 14:35:10');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `reservations`
 --
 
@@ -96,8 +120,12 @@ CREATE TABLE `reservations` (
 --
 
 INSERT INTO `reservations` (`id`, `user_id`, `type`, `date`, `time`, `status`) VALUES
-(1, 1, 'Library', '2025-10-24', '01:00:00', 'Cancelled'),
-(2, 1, 'Labs', '2025-10-24', '08:00:00', 'Cancelled');
+(1, 1, 'Labs', '2025-10-28', '01:00:00', 'Approved'),
+(2, 1, 'Library', '2025-10-28', '08:00:00', 'Approved'),
+(3, 1, 'Study Room', '2025-10-28', '08:00:00', 'Approved'),
+(4, 1, 'Labs', '2025-10-29', '08:00:00', 'Approved'),
+(5, 1, 'Labs', '2025-10-28', '08:00:00', 'Approved'),
+(6, 1, 'Labs', '2025-10-30', '08:00:00', 'Approved');
 
 --
 -- Indexes for dumped tables
@@ -114,6 +142,13 @@ ALTER TABLE `accounts`
 --
 ALTER TABLE `facilities`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `feedbacks`
+--
+ALTER TABLE `feedbacks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `reservations`
@@ -139,14 +174,26 @@ ALTER TABLE `facilities`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `feedbacks`
+--
+ALTER TABLE `feedbacks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `feedbacks`
+--
+ALTER TABLE `feedbacks`
+  ADD CONSTRAINT `feedbacks_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `reservations`

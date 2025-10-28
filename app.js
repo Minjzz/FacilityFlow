@@ -340,107 +340,12 @@ app.get('/admin/stud_records', isAuthenticated, (req, res, next) => {
 });
 
 app.get('/admin/analytics', isAuthenticated, (req, res) => {
-
     if (req.session.user.role !== 'Admin') {
         return res.redirect('/login');
     }
+    const success = req.query.login === 'success';
 
-    let analyticsData = {};
-
-    // Total active users
-    conn.query('SELECT COUNT(*) AS activeUsers FROM accounts', (err, users) => {
-        if (err) return res.status(500).send(err);
-        analyticsData.activeUsers = users[0].activeUsers;
-
-        // Bookings this week
-        conn.query(`
-            SELECT COUNT(*) AS bookingsThisWeek 
-            FROM reservations 
-            WHERE YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)
-        `, (err, bookings) => {
-            if (err) return res.status(500).send(err);
-            analyticsData.bookingsThisWeek = bookings[0].bookingsThisWeek;
-
-            // Average usage time
-            conn.query(`
-                SELECT AVG(TIMESTAMPDIFF(HOUR, start_time, end_time)) AS avgUsageTime
-                FROM reservations
-            `, (err, avgUsage) => {
-                if (err) return res.status(500).send(err);
-                analyticsData.avgUsageTime = avgUsage[0].avgUsageTime || 0;
-
-                // This week vs last week for usage growth
-                conn.query(`
-                    SELECT COUNT(*) AS thisWeek FROM reservations
-                    WHERE YEARWEEK(date,1) = YEARWEEK(CURDATE(),1)
-                `, (err, thisWeek) => {
-                    if (err) return res.status(500).send(err);
-
-                    conn.query(`
-                        SELECT COUNT(*) AS lastWeek FROM reservations
-                        WHERE YEARWEEK(date,1) = YEARWEEK(CURDATE(),1)-1
-                    `, (err, lastWeek) => {
-                        if (err) return res.status(500).send(err);
-
-                        analyticsData.usageGrowth = lastWeek[0].lastWeek === 0 
-                            ? 100 
-                            : Math.round(((thisWeek[0].thisWeek - lastWeek[0].lastWeek)/lastWeek[0].lastWeek)*100);
-
-                        // Monthly usage
-                        conn.query(`
-                            SELECT MONTH(date) AS month, COUNT(*) AS count
-                            FROM reservations
-                            GROUP BY MONTH(date)
-                            ORDER BY MONTH(date)
-                        `, (err, monthly) => {
-                            if (err) return res.status(500).send(err);
-                            const monthlyUsage = Array(12).fill(0);
-                            monthly.forEach(row => { monthlyUsage[row.month - 1] = row.count });
-                            analyticsData.monthlyUsage = monthlyUsage;
-
-                            // Top 5 facilities
-                            conn.query(`
-                                SELECT type AS name, COUNT(*) AS count
-                                FROM reservations
-                                GROUP BY type
-                                ORDER BY count DESC
-                                LIMIT 5
-                            `, (err, topFacilities) => {
-                                if (err) return res.status(500).send(err);
-                                analyticsData.topFacilities = topFacilities;
-
-                                // Booking source breakdown
-                                conn.query(`
-                                    SELECT source, COUNT(*) AS count FROM reservations GROUP BY source
-                                `, (err, sources) => {
-                                    if (err) return res.status(500).send(err);
-                                    const bookingSources = {};
-                                    sources.forEach(row => { bookingSources[row.source] = row.count });
-                                    analyticsData.bookingSources = bookingSources;
-
-                                    // Hourly usage
-                                    conn.query(`
-                                        SELECT HOUR(time) AS hour, COUNT(*) AS count
-                                        FROM reservations
-                                        GROUP BY HOUR(time)
-                                        ORDER BY HOUR(time)
-                                    `, (err, hourly) => {
-                                        if (err) return res.status(500).send(err);
-                                        const hourlyUsage = Array(24).fill(0);
-                                        hourly.forEach(row => { hourlyUsage[row.hour] = row.count });
-                                        analyticsData.hourlyUsage = hourlyUsage;
-
-                                        // Finally, render the page
-                                        res.render('analytics', { analyticsData });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
+    res.render('admin/analytics', { success, user: req.session.user });
 });
 
 app.get('/admin/feedbacks', isAuthenticated, (req, res, next) => {
