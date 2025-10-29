@@ -246,3 +246,74 @@ select:focus {
 .nav-link:hover {
   color: #c8facc !important;
 }
+
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0,0,0,0.3);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 5px;
+}
+.scroll-left { left: 0; }
+.scroll-right { right: 0; }
+#facility-container::-webkit-scrollbar { display: none; } /* hide scrollbar */
+
+/* Pagination container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    gap: 0.25rem;
+}
+
+/* Pagination items */
+.pagination li {
+    display: inline-block;
+}
+
+/* Pagination links */
+.pagination li a {
+    display: block;
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    color: #2e8b57;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+/* Hover effect */
+.pagination li a:hover {
+    background-color: #e8f5e9;
+    color: #1f6347;
+}
+
+/* Active page */
+.pagination li.active a {
+    background-color: #2e8b57;
+    color: #fff;
+    border-color: #2e8b57;
+}
+
+/* Disabled page (optional, if needed) */
+.pagination li.disabled a {
+    color: #aaa;
+    pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .pagination li a {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+}

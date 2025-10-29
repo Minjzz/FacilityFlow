@@ -120,3 +120,25 @@ footer {
     color: #fff;
     box-shadow: 0 3px 8px rgba(46, 139, 87, 0.3);
 }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  background-color: #2e8b57;
+  color: white;
+  text-align: center;
+  padding: 12px 0;
+  margin-top: auto;
+  font-size: 0.9rem;
+}

@@ -22,37 +22,56 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const track = document.getElementById('facilityTrack');
-    if (!track) return;
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("editFacilityModal");
+    const closeBtns = modal.querySelectorAll(".close, .close-modal");
 
-    const leftBtn = document.querySelector('.carousel-arrow.left');
-    const rightBtn = document.querySelector('.carousel-arrow.right');
-    
-    let currentIndex = 0;
-    const cardWidth = track.querySelector('.facility-card')?.offsetWidth || 0;
-    const cardsPerView = 4;
-    const totalCards = track.children.length;
-    const maxIndex = Math.max(0, totalCards - cardsPerView);
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            modal.classList.add("show");
 
-    function updateArrowVisibility() {
-        if (leftBtn) leftBtn.style.visibility = currentIndex <= 0 ? 'hidden' : 'visible';
-        if (rightBtn) rightBtn.style.visibility = currentIndex >= maxIndex ? 'hidden' : 'visible';
-    }
+            const id = btn.getAttribute("data-id");
+            const name = btn.getAttribute("data-name");
+            const type = btn.getAttribute("data-type");
+            const capacity = btn.getAttribute("data-capacity");
+            const status = btn.getAttribute("data-status");
 
-    function slideCards(direction) {
-        currentIndex = Math.max(0, Math.min(currentIndex + direction, maxIndex));
-        const offset = -(currentIndex * (cardWidth + 16)); // 16px is the gap
-        track.style.transform = `translateX(${offset}px)`;
-        updateArrowVisibility();
-    }
+            document.getElementById("editFacilityId").value = id;
+            document.getElementById("editFacilityName").value = name;
+            document.getElementById("editFacilityType").value = type;
+            document.getElementById("editFacilityCapacity").value = capacity;
+            document.getElementById("editFacilityStatus").value = status;
+        });
+    });
 
-    if (leftBtn) leftBtn.addEventListener('click', () => slideCards(-1));
-    if (rightBtn) rightBtn.addEventListener('click', () => slideCards(1));
+    closeBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            modal.classList.remove("show");
+        });
+    });
 
-    // Initialize arrow visibility
-    updateArrowVisibility();
-
-    // Update on window resize
-    window.addEventListener('resize', updateArrowVisibility);
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.classList.remove("show");
+        }
+    });
 });
+
+function confirmDelete(form) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}

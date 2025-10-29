@@ -14,9 +14,9 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="dashboard.html">
-                <img src="/images/logaur.png" alt="FacilityFlow Logo">
-                FacilityFlow
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/student/student_db">
+                <img src="/images/facilitylogo.png" alt="FacilityFlow Logo">
+                iFacility
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -40,7 +40,6 @@
             <div
                 class="card profile-card p-4 d-flex flex-md-row flex-column align-items-center justify-content-between shadow-sm">
                 <div class="d-flex align-items-center gap-3 mb-md-0 mb-3">
-                    <img src="/images/default-profile.png" alt="Profile Picture" class="profile-pic rounded-circle">
                     <div>
                         <h5 class="mb-0 fw-semibold">
                             <%= user.name %>
@@ -56,79 +55,170 @@
             </div>
         </section>
 
-
-        <!-- DASHBOARD -->
         <section id="dashboard" class="mb-5">
             <h3 class="mb-4 fw-semibold">Facility Dashboard</h3>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card p-4">
-                        <h5 class="fw-semibold mb-3">Labs</h5>
+
+            <div class="position-relative">
+                <button class="scroll-btn scroll-left">&lt;</button>
+
+                <div id="facility-container" class="d-flex overflow-auto px-2" style="gap: 1rem; scroll-behavior: smooth;">
+                    <% 
+                        const labs = facilities.filter(f => f.type === 'Laboratory');
+                        const studyRooms = facilities.filter(f => f.type === 'Study Room');
+                        const libraries = facilities.filter(f => f.type === 'Library');
+
+                        const allCards = [...labs, ...studyRooms];
+
+                        allCards.forEach(f => {
+                            const percentage = f.capacity ? Math.min(100, Math.round((f.current_occupation / f.capacity) * 100)) : 0;
+                            let statusColor = '', statusText = '';
+                            if(percentage >= 90){ statusColor = '#d9534f'; statusText = 'Full'; }
+                            else if(percentage >= 70){ statusColor = '#f0ad4e'; statusText = 'Almost Full'; }
+                            else{ statusColor = '#5cb85c'; statusText = 'Available'; }
+                    %>
+                    <div class="card p-4 flex-shrink-0" style="width: 300px;">
+                        <h5 class="fw-semibold mb-3"><%= f.name %></h5>
                         <div class="progress mb-2" style="height: 10px;">
-                            <div class="progress-bar progress-bar-almost" style="width:70%"></div>
+                            <div class="progress-bar" style="width: <%= percentage %>%; background-color: <%= statusColor %>;"></div>
                         </div>
-                        <p>Status: <strong style="color: #f0ad4e;">Almost Full</strong></p>
+                        <p>Status: <strong style="color: <%= statusColor %>;"><%= statusText %></strong></p>
+                        <p>Capacity: <%= f.current_occupation %> / <%= f.capacity %></p>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card p-4">
+                    <% }); %>
+
+                    <% 
+                        // Library card
+                        if(libraries.length){
+                            let totalCapacity = 0, totalOccupation = 0;
+                            libraries.forEach(f => { totalCapacity += f.capacity || 0; totalOccupation += f.current_occupation || 0; });
+                            const percentage = totalCapacity ? Math.min(100, Math.round((totalOccupation / totalCapacity) * 100)) : 0;
+                            let statusColor = '', statusText = '';
+                            if(percentage >= 90){ statusColor = '#d9534f'; statusText = 'Full'; }
+                            else if(percentage >= 70){ statusColor = '#f0ad4e'; statusText = 'Almost Full'; }
+                            else{ statusColor = '#5cb85c'; statusText = 'Available'; }
+                    %>
+                    <div class="card p-4 flex-shrink-0" style="width: 300px;">
                         <h5 class="fw-semibold mb-3">Library</h5>
                         <div class="progress mb-2" style="height: 10px;">
-                            <div class="progress-bar progress-bar-full" style="width: 90%"></div>
+                            <div class="progress-bar" style="width: <%= percentage %>%; background-color: <%= statusColor %>;"></div>
                         </div>
-                        <p>Status: <strong style="color: #d9534f;">Full</strong></p>
+                        <p>Status: <strong style="color: <%= statusColor %>;"><%= statusText %></strong></p>
+                        <p>Capacity: <%= totalOccupation %> / <%= totalCapacity %></p>
                     </div>
+                    <% } %>
                 </div>
-                <div class="col-md-4">
-                    <div class="card p-4">
-                        <h5 class="fw-semibold mb-3">Study Rooms</h5>
-                        <div class="progress mb-2" style="height: 10px;">
-                            <div class="progress-bar progress-bar-available" style="width: 40%"></div>
-                        </div>
-                        <p>Status: <strong style="color: #5cb85c;">Available</strong></p>
-                    </div>
-                </div>
+
+                <button class="scroll-btn scroll-right">&gt;</button>
             </div>
         </section>
 
-        <!-- BOOKING -->
         <section id="booking" class="mb-5">
             <div class="section-header">
                 <h3 class="fw-semibold">Reserve a Facility</h3>
             </div>
             <div class="card p-4">
-                <form id="bookingForm" action="/studentReservation" method="POST">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Facility</label>
-                            <select class="form-select" id="facility" name="type">
-                                <option>Labs</option>
-                                <option>Library</option>
-                                <option>Study Room</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" class="form-control" id="date" name="date" />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Time Slot</label>
-                            <select class="form-select" id="timeSlot" name="time">
-                                <option value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</option>
-                                <option value="10:00 AM - 12:00 NN">10:00 AM - 12:00 NN</option>
-                                <option value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</option>
-                                <option value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-green w-100">Reserve</button>
+                <table class="table table-bordered table-striped text-center align-middle">
+                    <thead>
+                        <tr>
+                            <th>Facility Name</th>
+                            <th>Type</th>
+                            <th>Capacity</th>
+                            <th>Occupation</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facility-table-body">
+                        <% if (facilities && facilities.length) { %>
+                            <% facilities.forEach(f => { %>
+                                <% if (['Laboratory', 'Study Room', 'Library'].includes(f.type)) { %>
+                                    <tr>
+                                        <td><%= f.name %></td>
+                                        <td><%= f.type || '-' %></td>
+                                        <td><%= f.capacity || '-' %></td>
+                                        <td><%= f.occupation %></td>
+                                        <td>
+                                            <% if (f.status === 'Available') { %>
+                                                <span class="badge bg-success"><%= f.status %></span>
+                                            <% } else if (f.status === 'Almost Full') { %>
+                                                <span class="badge bg-warning text-dark"><%= f.status %></span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger"><%= f.status %></span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <% if (f.status === 'Available') { %>
+                                                <button class="btn btn-success"
+                                                        onclick="openReserveModal('<%= f.name %>', '<%= f.type %>', '<%= f.id %>')">
+                                                    Reserve
+                                                </button>
+                                            <% } else { %>
+                                                N/A
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5">No facilities available.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+
+                    <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form id="reserveForm" action="/studentReservation" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="reserveModalLabel">Reserve Facility</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="facility_id" id="modalFacilityId">
+                                        <input type="hidden" name="facility_name" id="modalFacilityName">
+                                        <input type="hidden" name="facility_type" id="modalFacilityType">
+
+                                        <div class="mb-3">
+                                            <label for="modalDate" class="form-label">Select Date</label>
+                                            <input type="date" class="form-control" id="modalDate" name="date" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="modalTime" class="form-label">Select Time Slot</label>
+                                            <select class="form-select" id="modalTime" name="time" required>
+                                                <option value="">Select Time Slot</option>
+                                                <option value="08:00:00-11:00:00">8:00 AM - 11:00 AM</option>
+                                                <option value="13:00:00-15:00:00">1:00 PM - 3:00 PM</option>
+                                                <option value="15:00:00-17:00:00">3:00 PM - 5:00 PM</option>
+                                                <option value="23:00:00-24:00:00">11:00 PM - 12:00 AM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-green">Reserve</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </form>
+                </table>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <nav>
+                                <ul id="pagination" class="pagination justify-content-center"></ul>
+                            </nav>
+                        </td>
+                    </tr>
+                </tfoot>
             </div>
         </section>
 
-        <!-- RESERVATION HISTORY -->
         <section id="reservations" class="mb-5">
             <div class="section-header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="fw-semibold">My Reservations (Active)</h3>
@@ -138,7 +228,8 @@
                 <table class="table table-bordered table-striped text-center align-middle">
                     <thead>
                         <tr>
-                            <th>Facility</th>
+                            <th>Facility Name</th>
+                            <th>Type</th>
                             <th>Date</th>
                             <th>Time</th>
                             <th>Status</th>
@@ -146,43 +237,58 @@
                         </tr>
                     </thead>
                     <tbody id="bookingList">
-                        <% bookings.forEach(function(booking) { %>
-                            <% if (booking.status==='Pending' || booking.status==='Approved' ) { %>
-                                <tr>
-                                    <td>
-                                        <%= booking.type %>
-                                    </td>
-                                    <td>
-                                        <%= booking.date.toISOString().split('T')[0] %>
-                                    </td>
-                                    <td>
-                                        <%= booking.time %>
-                                    </td>
-                                    <td>
-                                        <% if (booking.status==='Pending' ) { %>
-                                            <span class="badge bg-warning text-dark">
-                                                <%= booking.status %>
-                                            </span>
-                                            <% } else if (booking.status==='Approved' ) { %>
-                                                <span class="badge bg-success">
-                                                    <%= booking.status %>
-                                                </span>
-                                                <% } %>
-                                    </td>
-                                    <td>
-                                        <% if (booking.status==='Pending' ) { %>
-                                            <form action="/cancelReservation" method="POST"
-                                                onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
-                                                <input type="hidden" name="reservation_id" value="<%= booking.id %>">
-                                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
-                                            </form>
-                                            <% } else { %>
-                                                N/A
-                                                <% } %>
-                                    </td>
-                                </tr>
-                                <% } %>
-                                    <% }); %>
+                        <% 
+                            const today = new Date().toISOString().split('T')[0]; 
+                            let hasBooking = false; // flag to track if any booking matches
+                            bookings.forEach(function(booking) { 
+                                const bookingDate = booking.date.toISOString().split('T')[0]; 
+                                if ((booking.status === 'Pending' || booking.status === 'Approved') && bookingDate === today) { 
+                                    hasBooking = true; 
+                        %>
+                            <tr>
+                                <td><%= booking.name %></td>
+                                <td><%= booking.type %></td>
+                                <td><%= bookingDate %></td>
+                                <td>
+                                    <%= new Date('1970-01-01T' + booking.start_time).toLocaleTimeString('en-US', {
+                                        hour: 'numeric', minute: '2-digit', hour12: true 
+                                    }) %> -
+                                    <%= new Date('1970-01-01T' + booking.end_time).toLocaleTimeString('en-US', {
+                                        hour: 'numeric', minute: '2-digit', hour12: true 
+                                    }) %>
+                                </td>
+                                <td>
+                                    <% if (booking.status === 'Pending') { %>
+                                        <span class="badge bg-warning text-dark"><%= booking.status %></span>
+                                    <% } else if (booking.status === 'Approved') { %>
+                                        <span class="badge bg-success"><%= booking.status %></span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (booking.status === 'Pending') { %>
+                                        <form action="/cancelReservation" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
+                                            <input type="hidden" name="reservation_id" value="<%= booking.id %>">
+                                            <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                                        </form>
+                                    <% } else if (booking.status === 'Finished') { %>
+                                        <a href="/student/feedbacks?reservation_id=<%= booking.id %>" class="btn btn-sm btn-primary">
+                                            Feedback
+                                        </a>
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% 
+                                } 
+                            }); 
+                            if (!hasBooking) { 
+                        %>
+                            <tr>
+                                <td colspan="6">No reservation today.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
@@ -255,6 +361,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/student_db.js"></script>
+    <script src="/js/student_dbscript.js"></script>
 
     <% if (alert) { %>
         <script>
@@ -292,6 +400,13 @@
                     dateInput.min = today;
                 });
             </script>
+
+    <script type="module">
+        import { initFacilityPagination } from '/js/facilityPagination.js';
+        const facilitiesData = <%- JSON.stringify(facilities.filter(f => ['Laboratory','Study Room','Library'].includes(f.type))) %>;
+        initFacilityPagination(facilitiesData);
+    </script>
+    
 </body>
 
 </html>

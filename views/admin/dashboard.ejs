@@ -171,15 +171,20 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% reservations.slice(0, 4).forEach(reservation => { %>
+                                <% 
+                                    const filteredReservations = reservations
+                                        .filter(r => ['Pending', 'Approved', 'Cancelled', 'Rejected'].includes(r.status))
+                                        .slice(0, 4); // limit to 4
+                                %>
+                                <% filteredReservations.forEach(reservation => { %>
                                     <tr>
-                                        <td><%= reservation.id %></td>
+                                        <td><%= reservation.request_id %></td>
                                         <td><%= reservation.student_name %></td>
                                         <td><%= reservation.type %></td>
                                         <td><%= reservation.date.toISOString().split('T')[0] %></td>
-                                        <td><%= reservation.time %></td>
+                                        <td><%= reservation.start_time %> - <%= reservation.end_time %></td>
                                         <td>
-                                            <span class="status <%= (reservation.status || '').toString().toLowerCase().replace(/\s+/g, '-') %>">
+                                            <span class="status <%= reservation.status.toLowerCase().replace(/\s+/g, '-') %>">
                                                 <%= reservation.status %>
                                             </span>
                                         </td>
@@ -188,7 +193,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="line-chart-card">
                         <h3>Daily Reservations Trend</h3>
                         <canvas id="lineChart"></canvas>

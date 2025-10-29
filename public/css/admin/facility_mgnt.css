@@ -1374,9 +1374,14 @@ body.dark-theme .stat-label {
     color: #2e8b57;
 }
 
-.status.unavailable {
+.status.maintenance {
     background: #fdecea;
     color: #d32f2f;
+}
+
+.status.occupied {
+    background: #fff8e1;
+    color: #f0ad4e;
 }
 
 .page-subtitle {
@@ -1754,4 +1759,44 @@ body.dark-theme .stat-label {
     margin-left: 1rem;
     color: #718096;
     font-size: 0.875rem;
+}
+
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Edit Button */
+.edit-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background-color: #2e8b57;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+    background-color: #256b44;
+}
+
+/* Delete Button */
+.delete-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background-color: #d32f2f;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #b71c1c;
 }

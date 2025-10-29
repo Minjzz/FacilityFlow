@@ -586,8 +586,6 @@ body.dark-theme .stat-label {
     color: #fff;
 }
 
-
-
 .status {
     padding: 4px 10px;
     border-radius: 20px;
@@ -615,7 +613,6 @@ body.dark-theme .stat-label {
 }
 
 .insight-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     transition: 0.3s ease;
 }

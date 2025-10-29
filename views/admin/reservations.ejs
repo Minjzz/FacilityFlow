@@ -92,7 +92,8 @@
                         <option value="study">Study Room</option>
                     </select>
                 </div>
-                <button class="add-btn" data-modal="newReservation"><i class="fa-solid fa-plus"></i> New Reservation</button>
+                <button class="add-btn" data-modal="newReservation"><i class="fa-solid fa-plus"></i> New
+                    Reservation</button>
             </div>
 
             <div class="modal" id="newReservationModal" aria-hidden="true">
@@ -167,38 +168,55 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% reservations.forEach(reservation => { %>
-                        <tr>
-                            <td><%= reservation.id %></td>
-                            <td><%= reservation.student_name %></td>
-                            <td><%= reservation.type %></td>
-                            <td><%= reservation.date.toISOString().split('T')[0] %></td>
-                            <td><%= reservation.time %></td>
-                            <td>
-                                <% if (reservation.status === 'Pending') { %>
-                                    <span class="badge bg-warning text-dark"><%= reservation.status %></span>
-                                <% } else if (reservation.status === 'Approved') { %>
-                                    <span class="badge bg-success"><%= reservation.status %></span>
-                                <% } else if (reservation.status === 'Rejected') { %>
-                                    <span class="badge bg-danger"><%= reservation.status %></span>
-                                <% } else if (reservation.status === 'Cancelled') { %>
-                                    <span class="badge bg-secondary"><%= reservation.status %></span>
-                                <% } %>
-                            </td>
-                            <td>
-                                <% if (reservation.status === 'Pending') { %>
-                                    <form action="/admin/reservations/<%= reservation.id %>/approve" method="POST" style="display:inline;">
-                                        <button type="submit" class="approve-btn">Approve</button>
-                                    </form>
-                                    <form action="/admin/reservations/<%= reservation.id %>/reject" method="POST" style="display:inline;">
-                                        <button type="submit" class="decline-btn">Reject</button>
-                                    </form>
-                                <% } else { %>
-                                    <span class="status <%= reservation.status.toLowerCase() %>"><%= reservation.status %></span>
-                                <% } %>
-                            </td>
-                        </tr>
-                        <% }); %>
+                        <% // Sort reservations by date and start_time descending const
+                            sortedReservations=reservations.slice().sort((a, b)=> {
+                            const dateA = new Date(a.date + 'T' + a.start_time);
+                            const dateB = new Date(b.date + 'T' + b.start_time);
+                            return dateB - dateA; // descending
+                            });
+                            %>
+
+                            <% sortedReservations.forEach(reservation=> { %>
+                                <tr>
+                                    <td>
+                                        <%= reservation.request_id %>
+                                    </td>
+                                    <td>
+                                        <%= reservation.student_name %>
+                                    </td>
+                                    <td>
+                                        <%= reservation.type %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(reservation.date).toISOString().split('T')[0] %>
+                                    </td>
+                                    <td>
+                                        <%= new Date('1970-01-01T' + reservation.start_time).toLocaleTimeString('en-US',
+                                            { hour: 'numeric' , minute: '2-digit' , hour12: true }) %>
+                                            -
+                                            <%= new Date('1970-01-01T' +
+                                                reservation.end_time).toLocaleTimeString('en-US', { hour: 'numeric' ,
+                                                minute: '2-digit' , hour12: true }) %>
+                                    </td>
+                                    <td>
+                                        <span class="status <%= reservation.status.toLowerCase() %>">
+                                            <%= reservation.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (reservation.status==='Pending' ) { %>
+                                            <form action="/admin/reservations/approve/<%= reservation.request_id %>"
+                                                method="POST" style="display:inline;">
+                                                <button type="submit" class="approve-btn">Approve</button>
+                                            </form>
+                                            <form action="/admin/reservations/reject/<%= reservation.request_id %>"
+                                                method="POST" style="display:inline;">
+                                                <button type="submit" class="decline-btn">Reject</button>
+                                            </form>
+                                            <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
                     </tbody>
                 </table>
             </div>
@@ -219,9 +237,9 @@
                 showConfirmButton: false
             });
         </script>
-    <% } %>
+        <% } %>
 
-    
+
 
 </body>
 

@@ -56,24 +56,6 @@
         </aside>
 
         <div class="main-content">
-            <div class="dashboard-navbar">
-                <div class="profile">
-                    <div class="info">
-                        <p>Hey, <b>Marlon</b></p>
-                        <small class="text-muted">Admin</small>
-                    </div>
-                    <div class="profile-photo" onclick="toggleDropdown()">
-                        <img src="../../images/profile/profile.png" alt="Profile Photo">
-                    </div>
-                </div>
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <a href="#"><span class="theme-icon material-symbols-rounded">person</span> Profile</a>
-                    <a href="#"><span class="theme-icon material-symbols-rounded">settings</span> Settings</a>
-                    <a href="../../backend/logout.php"><span class="theme-icon material-symbols-rounded">logout</span>
-                        Logout</a>
-                </div>
-            </div>
-
             <div class="page-header">
                 <h1 class="page-title">Usage Analytics</h1>
                 <p class="page-subtitle">Overview of facility reservations and trends for better management.</p>
@@ -84,28 +66,28 @@
                     <span class="material-symbols-rounded insight-icon">groups</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Active Users</h3>
-                        <p class="insight-value">820</p>
+                        <p class="insight-value"><%= analyticsData.activeUsers %></p>
                     </div>
                 </div>
                 <div class="insight-card">
                     <span class="material-symbols-rounded insight-icon">event</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Bookings This Week</h3>
-                        <p class="insight-value">156</p>
+                        <p class="insight-value"><%= analyticsData.bookingsThisWeek %></p>
                     </div>
                 </div>
                 <div class="insight-card">
                     <span class="material-symbols-rounded insight-icon">schedule</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Average Usage Time</h3>
-                        <p class="insight-value">2.3 hrs</p>
+                        <p class="insight-value"><%= analyticsData.avgUsageTime %> hrs</p>
                     </div>
                 </div>
                 <div class="insight-card">
                     <span class="material-symbols-rounded insight-icon">trending_up</span>
                     <div class="insight-details">
                         <h3 class="insight-title">Usage Growth</h3>
-                        <p class="insight-value">+12%</p>
+                        <p class="insight-value">+<%= analyticsData.usageGrowth %>%</p>
                     </div>
                 </div>
             </div>
@@ -117,91 +99,70 @@
                         <canvas id="usageChart"></canvas>
                     </div>
 
-                    <div class="chart-card">
-                        <h3>Top 5 Most Used Facilities</h3>
-                        <canvas id="topFacilitiesChart"></canvas>
-                    </div>
                 </div>
 
                 <div class="right-side">
                     <div class="chart-card">
-                        <h3>Booking Source Breakdown</h3>
-                        <canvas id="sourcePieChart"></canvas>
+                        <h3>Peak Usage by Hour</h3>
+                        <canvas id="hourlyChart"></canvas>
                     </div>
 
                     <div class="chart-card">
-                        <h3>Peak Usage by Hour</h3>
-                        <canvas id="hourlyChart"></canvas>
+                        <h3>Top 5 Most Used Facilities</h3>
+                        <canvas id="topFacilitiesChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/js/script.js"></script>
-    <script src="/js/analytics.js"></script>
-    <script type="text/javascript">
-    // Convert backend JSON string into usable JS variables
-    const analyticsData = JSON.parse('<%- JSON.stringify(analyticsData) %>');
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const analyticsData = JSON.parse('<%- JSON.stringify(analyticsData).replace(/'/g, "\\'") %>');
+        
+        const ctxUsage = document.getElementById('usageChart').getContext('2d');
+        new Chart(ctxUsage, {
+            type: 'line',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                datasets: [{
+                    label: 'Reservations',
+                    data: analyticsData.monthlyUsage,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            }
+        });
 
-    // Insight cards
-    document.querySelector('.insight-card:nth-child(1) .insight-value').textContent = analyticsData.activeUsers;
-    document.querySelector('.insight-card:nth-child(2) .insight-value').textContent = analyticsData.bookingsThisWeek;
-    document.querySelector('.insight-card:nth-child(3) .insight-value').textContent = analyticsData.avgUsageTime + ' hrs';
-    document.querySelector('.insight-card:nth-child(4) .insight-value').textContent = '+' + analyticsData.usageGrowth + '%';
+        const ctxTop = document.getElementById('topFacilitiesChart').getContext('2d');
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: analyticsData.topFacilities.map(f => f.name),
+                datasets: [{
+                    label: 'Reservations',
+                    data: analyticsData.topFacilities.map(f => f.count),
+                    backgroundColor: '#2980b9'
+                }]
+            },
+            options: { plugins: { legend: { display: false } } }
+        });
 
-    // Charts
-    const monthlyUsage = analyticsData.monthlyUsage;
-    const topFacilitiesLabels = analyticsData.topFacilities.map(f => f.name);
-    const topFacilitiesCounts = analyticsData.topFacilities.map(f => f.count);
-    const bookingSourcesLabels = Object.keys(analyticsData.bookingSources);
-    const bookingSourcesCounts = Object.values(analyticsData.bookingSources);
-    const hourlyUsage = analyticsData.hourlyUsage;
-
-    // Facility Usage (Monthly)
-    const ctxUsage = document.getElementById('usageChart').getContext('2d');
-    new Chart(ctxUsage, {
-        type: 'line',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-            datasets: [{
-                label: 'Reservations',
-                data: monthlyUsage,
-                borderColor: '#27ae60',
-                backgroundColor: 'rgba(39, 174, 96, 0.2)',
-                fill: true,
-                tension: 0.4
-            }]
-        }
-    });
-
-    // Top 5 Most Used Facilities
-    const ctxTop = document.getElementById('topFacilitiesChart').getContext('2d');
-    new Chart(ctxTop, {
-        type: 'bar',
-        data: {
-            labels: topFacilitiesLabels,
-            datasets: [{ label: 'Reservations', data: topFacilitiesCounts, backgroundColor: '#2980b9' }]
-        },
-        options: { plugins: { legend: { display: false } } }
-    });
-
-    // Booking Source Pie Chart
-    const ctxSource = document.getElementById('sourcePieChart').getContext('2d');
-    new Chart(ctxSource, {
-        type: 'pie',
-        data: { labels: bookingSourcesLabels, datasets: [{ data: bookingSourcesCounts, backgroundColor: ['#2980b9','#f39c12'] }] }
-    });
-
-    // Peak Usage by Hour
-    const ctxHour = document.getElementById('hourlyChart').getContext('2d');
-    new Chart(ctxHour, {
-        type: 'bar',
-        data: { labels: ['8AM','9AM','10AM','11AM','12PM','1PM','2PM','3PM','4PM','5PM'], datasets: [{ label: 'Users', data: hourlyUsage, backgroundColor: '#e74c3c' }] }
-    });
-</script>
-
-
+        const ctxHour = document.getElementById('hourlyChart').getContext('2d');
+        new Chart(ctxHour, {
+            type: 'bar',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => (i < 12 ? i + 'AM' : (i-12 || 12) + 'PM')),
+                datasets: [{
+                    label: 'Usage Count',
+                    data: analyticsData.hourlyUsage,
+                    backgroundColor: '#e74c3c'
+                }]
+            }
+        });
+    </script>
+    
 </body>
-
 </html>
