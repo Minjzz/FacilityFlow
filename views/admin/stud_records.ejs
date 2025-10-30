@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Student Records | FacilityFlow</title>
+    <title>Student Records | iFacility</title>
     <link rel="icon" type="image/png" href="../../images/logo/e.png" />
     <link rel="stylesheet" href="/css/admin/stud_records.css" />
     <link rel="stylesheet"
@@ -210,9 +210,11 @@
                                             Edit
                                         </button>
 
-                                        <form action="/deleteStudent/<%= results.id %>" method="POST" style="display:inline;">
-                                            <button type="submit" class="delete-btn">Delete</button>
+                                        <form action="/deleteStudent" method="POST" class="delete-form" style="display:inline;">
+                                            <input type="hidden" name="id" value="<%= results.id %>">
+                                            <button type="button" class="delete-btn">Delete</button>
                                         </form>
+
                                     </div>
                                 </td>
                             </tr>
@@ -285,6 +287,35 @@
             });
         </script>
         <% } %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const form = btn.closest('.delete-form'); 
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This will permanently delete the student record!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2e8b57',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); 
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

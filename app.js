@@ -773,6 +773,77 @@ function updateExpiredReservations() {
     });
 }
 
+// Time Out Reservation - Mark as completed and decrease facility occupation
+app.post('/timeoutReservation', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Student') return res.redirect('/login');
+    
+    const { reservation_id } = req.body;
+    const userId = req.session.user.id;
+
+    // First, verify that this reservation belongs to the current user
+    const checkSql = `
+        SELECT r.*, f.name AS facility_name 
+        FROM reservations r 
+        JOIN facilities f ON r.facility_id = f.id
+        WHERE r.id = ? AND r.user_id = ? AND r.status = 'Approved'
+    `;
+
+    conn.query(checkSql, [reservation_id, userId], (err, results) => {
+        if (err) {
+            console.error('Error checking reservation:', err);
+            req.session.alert = {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to process time out.'
+            };
+            return res.redirect('/student/student_db');
+        }
+
+        if (results.length === 0) {
+            req.session.alert = {
+                type: 'error',
+                title: 'Invalid Request',
+                message: 'Reservation not found or already completed.'
+            };
+            return res.redirect('/student/student_db');
+        }
+
+        const reservation = results[0];
+
+        // Update reservation status to 'Completed' and decrease facility occupation
+        const updateSql = `
+            UPDATE reservations r
+            JOIN facilities f ON r.facility_id = f.id
+            SET 
+                r.status = 'Completed',
+                f.occupation = CASE 
+                    WHEN f.occupation > 0 THEN f.occupation - 1 
+                    ELSE 0 
+                END
+            WHERE r.id = ?
+        `;
+
+        conn.query(updateSql, [reservation_id], (err2) => {
+            if (err2) {
+                console.error('Error updating reservation:', err2);
+                req.session.alert = {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to time out reservation.'
+                };
+                return res.redirect('/student/student_db');
+            }
+
+            req.session.alert = {
+                type: 'success',
+                title: 'Timed Out',
+                message: `You have successfully timed out from ${reservation.facility_name}.`
+            };
+            res.redirect('/student/student_db');
+        });
+    });
+});
+
 //Students
 app.get('/student/student_db', isAuthenticated, (req, res, next) => {
     if (req.session.user.role !== 'Student') return res.redirect('/login');

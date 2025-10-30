@@ -48,29 +48,3 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-
-    deleteButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const form = btn.closest('.delete-form'); 
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This will permanently delete the student record!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#2e8b57',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); 
-                }
-            });
-        });
-    });
-});
