@@ -23,8 +23,8 @@
     <div class="container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <img src="/images/logaur.png" alt="Logo" class="header-logo" />
-                <h1 class="header-title">FacilityFlow</h1>
+                <img src="/images/facilitylogo.png" alt="Logo" class="header-logo" />
+                <h1 class="header-title">iFacility</h1>
                 <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
             </header>
 
@@ -59,7 +59,7 @@
             <div class="dashboard-navbar">
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b>Marlon</b></p>
+                        <p>Hey, <b><%= user.name %></b></p>
                         <small class="text-muted">Admin</small>
                     </div>
                     <div class="profile-photo" onclick="toggleDropdown()">
@@ -168,7 +168,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% // Sort reservations by date and start_time descending const
+                        <%
                             sortedReservations=reservations.slice().sort((a, b)=> {
                             const dateA = new Date(a.date + 'T' + a.start_time);
                             const dateB = new Date(b.date + 'T' + b.start_time);
@@ -188,7 +188,13 @@
                                         <%= reservation.type %>
                                     </td>
                                     <td>
-                                        <%= new Date(reservation.date).toISOString().split('T')[0] %>
+                                        <%= (()=> {
+                                        const d = new Date(reservation.date);
+                                        const yyyy = d.getFullYear();
+                                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                        const dd = String(d.getDate()).padStart(2, '0');
+                                        return `${yyyy}-${mm}-${dd}`;
+                                        })() %>
                                     </td>
                                     <td>
                                         <%= new Date('1970-01-01T' + reservation.start_time).toLocaleTimeString('en-US',
@@ -205,8 +211,7 @@
                                     </td>
                                     <td>
                                         <% if (reservation.status==='Pending' ) { %>
-                                            <form action="/admin/reservations/approve/<%= reservation.request_id %>"
-                                                method="POST" style="display:inline;">
+                                            <form action="/admin/reservations/approve/<%= reservation.request_id %>" method="POST" style="display: inline;">
                                                 <button type="submit" class="approve-btn">Approve</button>
                                             </form>
                                             <form action="/admin/reservations/reject/<%= reservation.request_id %>"

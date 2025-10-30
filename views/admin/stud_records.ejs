@@ -22,11 +22,9 @@
     <div class="container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <img src="/images/logaur.png" alt="Logo" class="header-logo" />
-                <h1 class="header-title">FacilityFlow</h1>
-                <button class="sidebar-toggle">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
+                <img src="/images/facilitylogo.png" alt="Logo" class="header-logo" />
+                <h1 class="header-title">iFacility</h1>
+                <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
             </header>
 
             <div class="sidebar-content">
@@ -87,7 +85,7 @@
             <div class="dashboard-navbar">
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b>Marlon</b></p>
+                        <p>Hey, <b><%= user.name %></b></p>
                         <small class="text-muted">Admin</small>
                     </div>
                     <div class="profile-photo" onclick="toggleDropdown()">
@@ -142,18 +140,8 @@
                             <input type="text" id="fullName" name="name" placeholder="Jane Doe" required>
                         </div>
                         <div class="form-group">
-                            <label for="course">Course</label>
-                            <select id="course" name="course" required>
-                                <option value="">Select Course</option>
-                                <option>BSIT</option>
-                                <option>BSCS</option>
-                                <option>BSHM</option>
-                                <option>BSA</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="yearLevel">Year Level</label>
-                            <select id="yearLevel" name="yearLevel" required>
+                            <label for="year">Year Level</label>
+                            <select id="year" name="year" required>
                                 <option value="">Select Year</option>
                                 <option>1st Year</option>
                                 <option>2nd Year</option>
@@ -187,7 +175,6 @@
                         <tr>
                             <th>ID Number</th>
                             <th>Full Name</th>
-                            <th>Course</th>
                             <th>Year Level</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -203,10 +190,7 @@
                                     <%= results.name %>
                                 </td>
                                 <td>
-                                    <%= results.course %>
-                                </td>
-                                <td>
-                                    <%= results.yearLevel %>
+                                    <%= results.year %>
                                 </td>
                                 <td>
                                     <span
@@ -216,13 +200,17 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="edit-btn" data-id="<%= results.id %>" data-id_num="<%= results.id_num %>"
-                                            data-name="<%= results.name %>" data-course="<%= results.course %>"
-                                            data-yearLevel="<%= results.yearLevel %>" data-email="<%= results.email %>"
-                                            data-status="<%= results.status %>">Edit</button>
+                                        <button class="edit-btn"
+                                            data-id="<%= results.id %>"
+                                            data-id_num="<%= results.id_num %>"
+                                            data-name="<%= results.name %>"
+                                            data-year="<%= results.year %>"
+                                            data-email="<%= results.email %>"
+                                            data-status="<%= results.status %>">
+                                            Edit
+                                        </button>
 
-                                        <form action="/deleteStudent" method="POST" class="delete-form">
-                                            <input type="hidden" name="id" value="<%= results.id %>">
+                                        <form action="/deleteStudent/<%= results.id %>" method="POST" style="display:inline;">
                                             <button type="submit" class="delete-btn">Delete</button>
                                         </form>
                                     </div>
@@ -248,18 +236,8 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="updateCourse">Course</label>
-                                    <select name="course" id="updateCourse" required>
-                                        <option>BSIT</option>
-                                        <option>BSCS</option>
-                                        <option>BSHM</option>
-                                        <option>BSA</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="updateYearLevel">Year Level</label>
-                                    <select name="yearLevel" id="updateYearLevel" required>
+                                    <label for="updateYear">Year Level</label>
+                                    <select name="year" id="updateYear" required>
                                         <option>1st Year</option>
                                         <option>2nd Year</option>
                                         <option>3rd Year</option>

@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
 app.use(session({
-    secret: 'facilityflow-secret',
+    secret: 'ifacility-secret',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 }
@@ -26,6 +26,35 @@ function isAuthenticated(req, res, next) {
     }
 }
 
+function buildBookingEndDate(booking) {
+    let dateObj;
+    if (booking.date instanceof Date) {
+        dateObj = booking.date;
+    } else {
+        dateObj = new Date(booking.date); 
+    }
+
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+    const day = dateObj.getDate();
+
+    const timeParts = (booking.end_time || '').split(':');
+    const hour = parseInt(timeParts[0]) || 0;
+    const minute = parseInt(timeParts[1]) || 0;
+    const second = parseInt(timeParts[2]) || 0;
+
+    return new Date(year, month, day, hour, minute, second);
+}
+
+function localYYYYMMDD(dateObj = new Date()) {
+  const d = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -38,7 +67,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    const sql = `SELECT * FROM accounts WHERE email = ? AND password = ?`;
+    const sql = `SELECT * FROM users WHERE email = ? AND password = ?`;
     conn.query(sql, [email, password], (err, results) => {
         if (err) throw err;
 
@@ -155,9 +184,9 @@ app.post('/deleteFacility', (req, res) => {
 
 //Add Student
 app.post('/addStudent', (req, res) => {
-    const { id_num, name, course, yearLevel, email, password, status } = req.body;
-    const sql = `INSERT INTO accounts (id_num, name, course, yearLevel, email, password, status, role) VALUES (?, ?, ?, ?, ?, ?, ?, 'Student')`;
-    conn.query(sql, [id_num, name, course, yearLevel, email, password, status], (err, results) => {
+    const { id_num, name, year, email, password, status } = req.body;
+    const sql = `INSERT INTO users (id_num, name, year, email, password, status, role) VALUES (?, ?, ?, ?, ?, ?, 'Student')`;
+    conn.query(sql, [id_num, name, year, email, password, status], (err, results) => {
         if (err) {
             req.session.alert = {
                 type: 'error',
@@ -174,9 +203,9 @@ app.post('/addStudent', (req, res) => {
 });
 
 app.post('/updateStudent', (req, res) => {
-    const { id, id_num, name, course, yearLevel, email, status } = req.body;
-    const sql = 'UPDATE accounts SET id_num=?, name=?, course=?, yearLevel=?, email=?, status=? WHERE id=?';
-    conn.query(sql, [id_num, name, course, yearLevel, email, status, id], (err, result) => {
+    const { id, id_num, name, year, email, status } = req.body;
+    const sql = 'UPDATE users SET id_num=?, name=?, year=?, email=?, status=? WHERE id=?';
+    conn.query(sql, [id_num, name, year, email, status, id], (err, result) => {
         if (err) {
             req.session.alert = {
                 type: 'error',
@@ -195,7 +224,7 @@ app.post('/updateStudent', (req, res) => {
 
 app.post('/deleteStudent', (req, res) => {
     const { id } = req.body;
-    conn.query('DELETE FROM accounts WHERE id=?', [id], (err, result) => {
+    conn.query('DELETE FROM users WHERE id=?', [id], (err, result) => {
         if (err) {
             req.session.alert = {
                 type: 'error',
@@ -216,7 +245,7 @@ app.post('/admin/updateProfile', isAuthenticated, (req, res) => {
     const { name, email } = req.body;
     const userId = req.session.user.id;
 
-    const sql = `UPDATE accounts SET name = ?, email = ? WHERE id = ?`;
+    const sql = `UPDATE users SET name = ?, email = ? WHERE id = ?`;
     conn.query(sql, [name, email, userId], (err) => {
         if (err) {
             req.session.alert = { type: 'error', message: 'Failed to update profile' };
@@ -241,7 +270,7 @@ app.post('/admin/changePassword', isAuthenticated, (req, res) => {
         return res.redirect('/admin/settings');
     }
 
-    const sql = `SELECT password FROM accounts WHERE id = ?`;
+    const sql = `SELECT password FROM users WHERE id = ?`;
     conn.query(sql, [userId], (err, results) => {
         if (err) throw err;
         if (results.length > 0) {
@@ -254,7 +283,7 @@ app.post('/admin/changePassword', isAuthenticated, (req, res) => {
                 return res.redirect('/admin/settings');
             }
 
-            const updateSql = `UPDATE accounts SET password = ? WHERE id = ?`;
+            const updateSql = `UPDATE users SET password = ? WHERE id = ?`;
             conn.query(updateSql, [newPassword, userId], (err) => {
                 if (err) throw err;
                 req.session.alert = {
@@ -268,77 +297,91 @@ app.post('/admin/changePassword', isAuthenticated, (req, res) => {
     });
 });
 
-app.post('/admin/reservations/:id/approve', (req, res, next) => {
-    const reservationId = req.params.id;
+app.post('/admin/reservations/approve/:request_id', isAuthenticated, (req, res) => {
+    if (req.session.user.role !== 'Admin') return res.redirect('/login');
 
-    const updateReservationSql = `UPDATE reservations SET status = 'Approved' WHERE id = ?`;
-    conn.query(updateReservationSql, [reservationId], (err) => {
-        if (err) {
-            console.error(err);
-            req.session.alert = { type: 'error', message: 'Failed to approve reservation.' };
+    const requestId = req.params.request_id;
+
+    const getReservationSql = `SELECT * FROM reservations WHERE request_id = ?`;
+    conn.query(getReservationSql, [requestId], (err, reservations) => {
+        if (err || reservations.length === 0) {
+            req.session.alert = { type: 'error', message: 'Reservation not found.' };
             return res.redirect('/admin/reservations');
         }
 
-        const getReservationSql = `SELECT type, date, start_time, end_time FROM reservations WHERE id = ?`;
-        conn.query(getReservationSql, [reservationId], (err2, reservations) => {
-            if (err2 || reservations.length === 0) {
-                console.error(err2);
+        const booking = reservations[0];
+
+        const getFacilitySql = `SELECT * FROM facilities WHERE id = ?`;
+        conn.query(getFacilitySql, [booking.facility_id], (err2, facilities) => {
+            if (err2 || facilities.length === 0) {
+                req.session.alert = { type: 'error', message: 'Facility not found.' };
                 return res.redirect('/admin/reservations');
             }
 
-            const booking = reservations[0];
+            const facility = facilities[0];
 
-            const getFacilitySql = `SELECT occupation, capacity, status FROM facilities WHERE name = ?`;
-            conn.query(getFacilitySql, [booking.type], (err3, facilities) => {
-                if (err3 || facilities.length === 0) {
-                    console.error(err3);
+            const bookingDate = new Date(booking.date);
+            const [endHour, endMinute, endSecond = 0] = (booking.end_time || '00:00:00').split(':').map(Number);
+            const bookingEnd = new Date(
+                bookingDate.getFullYear(),
+                bookingDate.getMonth(),
+                bookingDate.getDate(),
+                endHour,
+                endMinute,
+                endSecond
+            );
+            const now = new Date();
+
+            let newStatus;
+            if (now > bookingEnd && booking.status === 'Pending') {
+                newStatus = 'Completed';
+            } else {
+                newStatus = 'Approved';
+            }
+
+            const updateReservationSql = `UPDATE reservations SET status = ? WHERE request_id = ?`;
+            conn.query(updateReservationSql, [newStatus, requestId], (err3) => {
+                if (err3) {
+                    req.session.alert = { type: 'error', message: 'Failed to update reservation status.' };
                     return res.redirect('/admin/reservations');
                 }
 
-                const facility = facilities[0];
-                let occupation = [];
-
-                if (facility.occupation) {
-                    try {
-                        occupation = JSON.parse(facility.occupation);
-                    } catch (parseErr) {
-                        console.error('Error parsing occupation JSON:', parseErr);
-                        occupation = [];
-                    }
+                if (newStatus === 'Approved') {
+                    conn.query('UPDATE facilities SET occupation = occupation + 1 WHERE id = ?', [facility.id], (err4) => {
+                        if (err4) console.error(err4);
+                    });
+                } else if (newStatus === 'Completed' && booking.status === 'Pending') {
+                    conn.query('UPDATE facilities SET occupation = CASE WHEN occupation > 0 THEN occupation - 1 ELSE 0 END WHERE id = ?', [facility.id], (err4) => {
+                        if (err4) console.error(err4);
+                    });
                 }
 
-                occupation.push({
-                    date: booking.date.toISOString().split('T')[0],
-                    start_time: booking.start_time,
-                    end_time: booking.end_time
-                });
-
-                const currentCount = occupation.length;
-                const isFull = currentCount >= facility.capacity;
-
-                const updateFacilitySql = `UPDATE facilities SET occupation = ?, status = ? WHERE name = ?`;
-                conn.query(updateFacilitySql, [JSON.stringify(occupation), isFull ? 'Occupied' : 'Available', booking.type], (err4) => {
-                    if (err4) {
-                        console.error('Failed to update facility occupation/status:', err4);
-                    }
-
-                    req.session.alert = {
-                        type: 'success',
-                        message: `Reservation approved. Facility marked as ${isFull ? 'Occupied' : 'Available'}!`
-                    };
-                    return res.redirect('/admin/reservations');
-                });
+                req.session.alert = {
+                    type: 'success',
+                    message: newStatus === 'Completed'
+                        ? 'Reservation time has passed — automatically marked as Completed and occupation decreased.'
+                        : 'Reservation approved successfully and facility occupation updated.'
+                };
+                return res.redirect('/admin/reservations');
             });
         });
     });
 });
 
+app.post('/admin/reservations/reject/:request_id', (req, res) => {
+    const requestId = req.params.request_id; 
+    const sql = `UPDATE reservations SET status = 'Rejected' WHERE request_id = ?`;
+    
+    conn.query(sql, [requestId], (err, result) => {
+        if (err) {
+            console.error(err);
+            req.session.alert = {
+                type: 'error',
+                message: 'Failed to reject reservation'
+            };
+            return res.redirect('/admin/reservations');
+        }
 
-app.post('/admin/reservations/:id/reject', (req, res) => {
-    const id = req.params.id;
-    const sql = `UPDATE reservations SET status = 'Rejected' WHERE id = ?`;
-    conn.query(sql, [id], (err, result) => {
-        if (err) throw err;
         req.session.alert = {
             type: 'success',
             message: 'Reservation rejected successfully'
@@ -347,7 +390,7 @@ app.post('/admin/reservations/:id/reject', (req, res) => {
     });
 });
 
-//Route to get reservations JSON
+
 app.get('/admin/dashboard/reservations', (req, res) => {
     const sql = `
         SELECT r.id, r.type, r.date, r.time, r.status, s.name AS student_name
@@ -381,7 +424,7 @@ app.get('/admin/dashboard', isAuthenticated, (req, res, next) => {
             if (err) return next(err);
             todayReservations = result2[0].count;
 
-            conn.query('SELECT COUNT(*) AS count FROM accounts WHERE role = "Student"', (err, result3) => {
+            conn.query('SELECT COUNT(*) AS count FROM users WHERE role = "Student"', (err, result3) => {
                 if (err) return next(err);
                 totalStudents = result3[0].count;
 
@@ -389,7 +432,7 @@ app.get('/admin/dashboard', isAuthenticated, (req, res, next) => {
                     if (err) return next(err);
                     totalFeedbacks = result4[0].count;
 
-                    const display = `SELECT r.*, a.name AS student_name FROM reservations r JOIN accounts a ON r.user_id = a.id ORDER BY r.date DESC LIMIT 10`;
+                    const display = `SELECT r.*, a.name AS student_name FROM reservations r JOIN users a ON r.user_id = a.id ORDER BY r.date DESC LIMIT 10`;
                     conn.query(display, (err, reservations) => {
                         if (err) return next(err);
 
@@ -435,6 +478,7 @@ app.get('/admin/facility_mgnt', isAuthenticated, (req, res, next) => {
 
     const alert = req.session.alert;
     delete req.session.alert;
+    updateExpiredReservations();
 
     const display = `SELECT * FROM facilities`;
     conn.query(display, (err, results) => {
@@ -451,7 +495,7 @@ app.get('/admin/reservations', isAuthenticated, (req, res) => {
     const alert = req.session.alert;
     delete req.session.alert;
 
-    const display = `SELECT r.*, a.name AS student_name FROM reservations r JOIN accounts a ON r.user_id = a.id ORDER BY r.date DESC`;
+    const display = `SELECT r.*, a.name AS student_name FROM reservations r JOIN users a ON r.user_id = a.id ORDER BY r.date DESC`;
     conn.query(display, (err, results) => {
         if (err) return next(err);
         return res.render('admin/reservations', { reservations: results, alert, user: req.session.user });
@@ -465,7 +509,7 @@ app.get('/admin/stud_records', isAuthenticated, (req, res, next) => {
     const alert = req.session.alert;
     delete req.session.alert;
 
-    const display = `SELECT * FROM accounts WHERE role = 'Student'`;
+    const display = `SELECT * FROM users WHERE role = 'Student'`;
     conn.query(display, (err, results) => {
         if (err) return next(err);
         return res.render('admin/stud_records', { students: results, alert, user: req.session.user });
@@ -479,7 +523,7 @@ app.get('/admin/analytics', isAuthenticated, (req, res) => {
 
     let analyticsData = {};
 
-    conn.query('SELECT COUNT(*) AS activeUsers FROM accounts WHERE role = "Student"', (err, users) => {
+    conn.query('SELECT COUNT(*) AS activeUsers FROM users WHERE role = "Student"', (err, users) => {
         if (err) return res.status(500).send(err);
         analyticsData.activeUsers = users[0].activeUsers;
 
@@ -548,7 +592,7 @@ app.get('/admin/analytics', isAuthenticated, (req, res) => {
                                     hourly.forEach(row => { hourlyUsage[row.hour] = row.count });
                                     analyticsData.hourlyUsage = hourlyUsage;
 
-                                    res.render('admin/analytics', { analyticsData });
+                                    res.render('admin/analytics', { analyticsData, user: req.session.user });
                                 });
                             });
                         });
@@ -559,12 +603,10 @@ app.get('/admin/analytics', isAuthenticated, (req, res) => {
     });
 });
 
-
-
 app.get('/admin/feedbacks', isAuthenticated, (req, res, next) => {
     if (req.session.user.role !== 'Admin') return res.redirect('/login');
 
-    const sql = `SELECT f.*, a.name AS student_name FROM feedbacks f JOIN accounts a ON f.user_id = a.id ORDER BY f.created_at DESC`;
+    const sql = `SELECT f.*, a.name AS student_name FROM feedbacks f JOIN users a ON f.user_id = a.id ORDER BY f.created_at DESC`;
 
     conn.query(sql, (err, feedbacks) => {
         if (err) return next(err);
@@ -599,70 +641,77 @@ app.get('/admin/settings', isAuthenticated, (req, res) => {
     res.render('admin/settings', { success, user: req.session.user, alert });
 });
 
-
-//Student Functions
-app.post('/studentReservation', isAuthenticated, (req, res, next) => {
+app.post('/studentReservation', isAuthenticated, (req, res) => {
     if (req.session.user.role !== 'Student') return res.redirect('/login');
 
-    const { facility_id, facility_name, facility_type, date, time } = req.body;
+    let { facility_id, name, type, time } = req.body; 
     const userId = req.session.user.id;
-    const requestId = 'REQ-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    const [start_time, end_time] = time.split('-');
+    if (!facility_id || !name || !type || !time) {
+        console.log(req.body);
+        return res.send('Missing data');
+    }
 
-    const sql = `
-        INSERT INTO reservations (user_id, request_id, facility_id, type, facility_name, facility_type, date, start_time, end_time, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
-    `;
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const date = `${yyyy}-${mm}-${dd}`; 
 
-    conn.query(sql, [userId, requestId, facility_id, facility_type, facility_name, facility_type, date, start_time, end_time], (err, results) => {
-        if (err) {
-            console.error('Reservation insert failed:', err);
-            req.session.alert = {
-                type: 'error',
-                message: 'Reservation not successful. Try again.'
-            };
-            return res.redirect('/student/student_db');
-        }
+    conn.query('SELECT * FROM facilities WHERE id = ?', [facility_id], (err, results) => {
+        if (err) throw err;
+        if (results.length === 0) return res.send('Invalid facility ID');
 
-        const updateOccupation = `
-            UPDATE facilities
-            SET current_occupation = current_occupation + 1
-            WHERE id = ?
+        const requestId = 'REQ-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const [start_time, end_time] = time.split('-');
+
+        const sql = `
+            INSERT INTO reservations 
+            (user_id, facility_id, request_id, name, type, date, start_time, end_time, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        conn.query(updateOccupation, [facility_id], (err2) => {
-            if (err2) console.error('Failed to update facility occupation:', err2);
-        });
+        const values = [userId, facility_id, requestId, name, type, date, start_time, end_time, 'Pending'];
 
-        req.session.alert = {
-            type: 'success',
-            message: 'Reservation successful. Wait for the approval.'
-        };
-        return res.redirect('/student/student_db');
+        conn.query(sql, values, (err2) => {
+            if (err2) throw err2;
+            req.session.alert = {
+                type: 'success',
+                title: 'Reserved!',
+                message: `${name} has been reserved successfully. Waiting for admin approval.`
+            };
+            res.redirect('/student/student_db');
+        });
     });
 });
-
 
 app.post('/cancelReservation', isAuthenticated, (req, res, next) => {
     if (req.session.user.role !== 'Student') return res.redirect('/login');
     const { reservation_id } = req.body;
-    const sql = `UPDATE reservations SET status = 'Cancelled' WHERE id = ? AND user_id = ?`;
-    conn.query(sql, [reservation_id, req.session.user.id], (err, results) => {
-        if (err) {
-            req.session.alert = {
-                type: 'error',
-                message: 'Failed to cancel reservation. Try again.'
-            };
-            return res.redirect('/student/student_db');
+
+    conn.query('SELECT * FROM reservations WHERE id = ? AND user_id = ?', [reservation_id, req.session.user.id], (err, results) => {
+        if (err) throw err;
+        if (!results[0]) return res.send('Reservation not found');
+
+        const reservation = results[0];
+
+        if (reservation.status === 'Approved') {
+            conn.query('UPDATE facilities SET occupation = CASE WHEN occupation > 0 THEN occupation - 1 ELSE 0 END WHERE id = ?', [reservation.facility_id], (err) => {
+                if (err) console.error(err);
+            });
         }
 
-        req.session.alert = {
-            type: 'success',
-            message: 'Reservation canceled successfully!'
-        }
-        return res.redirect('/student/student_db');
+        conn.query('UPDATE reservations SET status = "Cancelled" WHERE id = ?', [reservation_id], (err) => {
+            if (err) throw err;
+
+            req.session.alert = {
+                type: 'success',
+                message: 'Reservation canceled successfully!'
+            };
+            res.redirect('/student/student_db');
+        });
     });
 });
+
 
 app.post('/student/addFeedback', isAuthenticated, (req, res) => {
     const { rating, service_quality, facility_cleanliness, comments, suggestions } = req.body;
@@ -700,38 +749,120 @@ app.post('/student/addFeedback', isAuthenticated, (req, res) => {
 });
 
 
+function updateExpiredReservations() {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0];
+
+    const sql = `
+        UPDATE reservations r
+        JOIN facilities f ON r.facility_id = f.id
+        SET 
+            r.status = 'Completed',
+            f.occupation = CASE 
+                WHEN f.occupation > 0 THEN f.occupation - 1
+                ELSE 0
+            END
+        WHERE 
+            r.status = 'Pending'
+            AND (r.date < ? OR (r.date = ? AND r.end_time < ?))
+    `;
+
+    conn.query(sql, [currentDate, currentDate, currentTime], (err, result) => {
+        if (err) console.error('Error updating expired reservations:', err);
+    });
+}
+
 //Students
 app.get('/student/student_db', isAuthenticated, (req, res, next) => {
     if (req.session.user.role !== 'Student') return res.redirect('/login');
 
     const alert = req.session.alert;
     delete req.session.alert;
+    updateExpiredReservations();
 
-    const getFacilities = `SELECT * FROM facilities`;
+    // Add 'status' to the SELECT statement
+    const getFacilities = `
+    SELECT f.id, f.name, f.type, f.capacity, f.occupation, f.status,
+        COALESCE(SUM(CASE WHEN r.status='Approved' AND DATE(r.date)=CURDATE() THEN 1 ELSE 0 END),0) AS current_occupation
+    FROM facilities f
+    LEFT JOIN reservations r ON r.facility_id = f.id
+    GROUP BY f.id, f.name, f.type, f.capacity, f.occupation, f.status
+    `;
+    
     conn.query(getFacilities, (err, facilities) => {
         if (err) return next(err);
 
-        const displayReservations = `SELECT * FROM reservations WHERE user_id = ? ORDER BY date DESC`;
+        const displayReservations = `
+            SELECT r.*, f.name, f.type 
+            FROM reservations r
+            JOIN facilities f ON r.facility_id = f.id 
+            WHERE r.user_id = ? 
+            AND r.status = 'Approved' 
+            AND DATE(r.date) = CURDATE() 
+            ORDER BY r.start_time ASC`;
+
         conn.query(displayReservations, [req.session.user.id], (err2, bookings) => {
             if (err2) return next(err2);
 
+            if (bookings.length === 0) {
+                return res.render('student/student_db', { 
+                    user: req.session.user, 
+                    alert, 
+                    facilities, 
+                    bookings: [] 
+                });
+            }
+
             const now = new Date();
+            let validBookings = [];
+            let processed = 0;
 
             bookings.forEach(booking => {
-                const bookingEnd = new Date(`${booking.date.toISOString().split('T')[0]}T${booking.end_time}`);
-                if (bookingEnd < now && booking.status !== 'Finished') {
-                    const updateSql = `UPDATE reservations SET status = 'Finished' WHERE id = ?`;
+                const bookingEnd = buildBookingEndDate(booking);
+
+                if (bookingEnd < now) {
+                    const updateSql = `
+                        UPDATE reservations r
+                        JOIN facilities f ON r.facility_id = f.id
+                        SET 
+                            r.status = 'Completed',
+                            f.occupation = CASE WHEN f.occupation > 0 THEN f.occupation - 1 ELSE 0 END
+                        WHERE r.id = ?`;
+
                     conn.query(updateSql, [booking.id], (err3) => {
-                        if (err3) console.error('Failed to update finished reservation:', err3);
-                        else booking.status = 'Finished';
+                        if (err3) {
+                            console.error('Failed to complete reservation:', err3);
+                        }
+                        processed++;
+                        
+                        if (processed === bookings.length) {
+                            res.render('student/student_db', { 
+                                user: req.session.user, 
+                                alert, 
+                                facilities, 
+                                bookings: validBookings 
+                            });
+                        }
                     });
+                } else {
+                    validBookings.push(booking);
+                    processed++;
+                    
+                    if (processed === bookings.length) {
+                        res.render('student/student_db', { 
+                            user: req.session.user, 
+                            alert, 
+                            facilities, 
+                            bookings: validBookings 
+                        });
+                    }
                 }
             });
-
-            res.render('student/student_db', { user: req.session.user, alert, facilities, bookings });
         });
     });
 });
+
 app.get('/student/reservations', isAuthenticated, (req, res, next) => {
     if (req.session.user.role !== 'Student') return res.redirect('/login');
 
@@ -742,13 +873,28 @@ app.get('/student/reservations', isAuthenticated, (req, res, next) => {
         const now = new Date();
 
         bookings.forEach(booking => {
-            const bookingEnd = new Date(`${booking.date.toISOString().split('T')[0]}T${booking.end_time}`);
-            if (bookingEnd < now && booking.status !== 'Finished') {
-                const updateSql = `UPDATE reservations SET status = 'Finished' WHERE id = ?`;
-                conn.query(updateSql, [booking.id], (err2) => {
-                    if (err2) console.error('Failed to update finished reservation:', err2);
-                    else booking.status = 'Finished';
-                });
+            try {
+                const bookingEnd = buildBookingEndDate(booking);
+
+                if (bookingEnd < now && booking.status !== 'Completed') {
+                    const updateSql = `
+                UPDATE reservations r
+                JOIN facilities f ON r.facility_id = f.id
+                SET 
+                r.status = 'Completed',
+                f.occupation = CASE WHEN f.occupation > 0 THEN f.occupation - 1 ELSE 0 END
+                WHERE r.id = ?
+            `;
+                    conn.query(updateSql, [booking.id], (err2) => {
+                        if (err2) {
+                            console.error('Failed to update finished reservation:', err2);
+                        } else {
+                            booking.status = 'Completed';
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error processing booking end time:', e, booking);
             }
         });
 
@@ -770,6 +916,8 @@ app.get('/student/feedbacks', isAuthenticated, (req, res, next) => {
         res.render('student/feedbacks', { feedbacks, alert, user: req.session.user });
     });
 });
+
+setInterval(updateExpiredReservations, 5 * 60 * 1000);
 
 app.listen(8000, () => {
     console.log("Listening to this port");

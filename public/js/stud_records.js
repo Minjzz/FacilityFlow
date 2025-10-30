@@ -23,42 +23,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("updateStudentModal");
-    const closeBtns = modal.querySelectorAll(".close");
+    const closeBtns = modal.querySelectorAll(".close, .close-modal");
 
     document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             modal.classList.add("show");
 
-            const id = btn.getAttribute("data-id");
-            const id_num = btn.getAttribute("data-id_num");
-            const name = btn.getAttribute("data-name");
-            const course = btn.getAttribute("data-course");
-            const yearLevel = btn.getAttribute("data-yearLevel");
-            const email = btn.getAttribute("data-email");
-            const status = btn.getAttribute("data-status");
-
-            document.getElementById("updateStudentId").value = id;
-            document.getElementById("updateStudentNum").value = id_num;
-            document.getElementById("updateFullName").value = name;
-            document.getElementById("updateCourse").value = course;
-            document.getElementById("updateYearLevel").value = yearLevel;
-            document.getElementById("updateEmail").value = email;
-            document.getElementById("updateStatus").value = status;
+            document.getElementById("updateStudentId").value = btn.dataset.id;
+            document.getElementById("updateStudentNum").value = btn.dataset.id_num;
+            document.getElementById("updateFullName").value = btn.dataset.name;
+            document.getElementById("updateYear").value = btn.dataset.year;
+            document.getElementById("updateEmail").value = btn.dataset.email;
+            document.getElementById("updateStatus").value = btn.dataset.status;
         });
     });
 
     closeBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            modal.classList.remove("show");
-        });
+        btn.addEventListener("click", () => modal.classList.remove("show"));
     });
 
     modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.classList.remove("show");
-        }
+        if (e.target === modal) modal.classList.remove("show");
     });
 });
+
 
 
 document.addEventListener('DOMContentLoaded', () => {

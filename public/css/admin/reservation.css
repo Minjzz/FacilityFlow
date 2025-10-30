@@ -1398,6 +1398,21 @@ body.dark-theme .stat-label {
     color: #2e8b57;
 }
 
+.status.cancelled {
+    background: #fdecea;
+    color: #d32f2f;
+}
+
+.status.rejected {
+    background: #fce4ec; /* light pink */
+    color: #c2185b;      /* dark pink/red */
+}
+
+.status.completed {
+    background: #e3f2fd; /* light blue */
+    color: #1565c0;      /* dark blue */
+}
+
 .approve-btn,
 .decline-btn {
     border: none;

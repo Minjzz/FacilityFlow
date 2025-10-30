@@ -599,7 +599,6 @@ body.dark-theme .stat-label {
 .approved {
     background: #e8f5e9;
     color: #2e8b57;
-    ;
 }
 
 .pending {
@@ -610,6 +609,16 @@ body.dark-theme .stat-label {
 .cancelled {
     background: #fdecea;
     color: #d32f2f;
+}
+
+.rejected {
+    background: #fce4ec; /* light pink */
+    color: #c2185b;      /* dark pink/red */
+}
+
+.completed {
+    background: #e3f2fd; /* light blue */
+    color: #1565c0;      /* dark blue */
 }
 
 .insight-card:hover {

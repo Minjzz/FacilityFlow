@@ -23,8 +23,8 @@
     <div class="container">
         <aside class="sidebar">
             <header class="sidebar-header">
-                <img src="/images/logaur.png" alt="Logo" class="header-logo">
-                <h1 class="header-title">FacilityFlow</h1>
+                <img src="/images/facilitylogo.png" alt="Logo" class="header-logo" />
+                <h1 class="header-title">iFacility</h1>
                 <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
             </header>
 
@@ -56,6 +56,24 @@
         </aside>
 
         <div class="main-content">
+            <div class="dashboard-navbar">
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b><%= user.name %></b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-photo" onclick="toggleDropdown()">
+                        <img src="../../images/profile/profile.png" alt="Profile Photo" />
+                    </div>
+                </div>
+
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#"><span class="material-symbols-rounded">person</span> Profile</a>
+                    <a href="#"><span class="material-symbols-rounded">settings</span> Settings</a>
+                    <a href="../../backend/logout.php"><span class="material-symbols-rounded">logout</span> Logout</a>
+                </div>
+            </div>
+
             <div class="page-header">
                 <h1 class="page-title">Usage Analytics</h1>
                 <p class="page-subtitle">Overview of facility reservations and trends for better management.</p>

@@ -21,8 +21,8 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <header class="sidebar-header">
-                <img src="/images/logaur.png" alt="Logo" class="header-logo">
-                <h1 class="header-title">FacilityFlow</h1>
+                <img src="/images/facilitylogo.png" alt="Logo" class="header-logo">
+                <h1 class="header-title">iFacility</h1>
                 <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
             </header>
 
@@ -58,7 +58,9 @@
             <div class="dashboard-navbar">
                 <div class="profile">
                     <div class="info">
-                        <p>Hey, <b>Marlon</b></p>
+                        <p>Hey, <b>
+                                <%= user.name %>
+                            </b></p>
                         <small class="text-muted">Admin</small>
                     </div>
                     <div class="profile-photo" onclick="toggleDropdown()">
@@ -95,7 +97,7 @@
                         <button class="close-modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <form id="addFacilityForm" action="/addFacility" method="POST" enctype="multipart/form-data">
+                        <form id="addFacilityForm" action="/addFacility" method="POST">
                             <div class="form-group">
                                 <label for="facilityName">Facility Name</label>
                                 <input type="text" id="facilityName" name="name" required>
@@ -148,14 +150,20 @@
                 </thead>
                 <tbody>
                     <% if (typeof facilities !== 'undefined' && facilities.length) { %>
-                        <% facilities.forEach(f => { 
-                            let status = f.status;
+                        <% facilities.forEach(f => {
+                            let status = f.status; // default status from database
+
                             if (f.occupation >= f.capacity) {
                                 status = 'Occupied';
                             } else if (f.occupation === 0) {
                                 status = 'Available';
-                            } else if (f.occupation < f.capacity) {
-                                status = 'Almost Full';
+                            } else {
+                                let occupancyRate = (f.occupation / f.capacity) * 100;
+                                if (occupancyRate >= 75) {
+                                    status = 'Almost Full';
+                                } else {
+                                    status = 'Available';
+                                }
                             }
                         %>
                             <tr>
@@ -164,16 +172,18 @@
                                 <td><%= f.capacity || '-' %></td>
                                 <td><%= f.occupation %></td>
                                 <td>
-                                    <span class="status <%= status.toLowerCase().replace(/\s+/g, '-') %>"><%= status %></span>
+                                    <span class="status <%= status.toLowerCase().replace(/\s+/g, '-') %>">
+                                        <%= status %>
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="edit-btn"
-                                            data-id="<%= f.id %>"
-                                            data-name="<%= f.name %>"
-                                            data-type="<%= f.type %>"
-                                            data-capacity="<%= f.capacity %>"
-                                            data-status="<%= f.status %>">
+                                        <button class="edit-btn" 
+                                                data-id="<%= f.id %>" 
+                                                data-name="<%= f.name %>"
+                                                data-type="<%= f.type %>" 
+                                                data-capacity="<%= f.capacity %>"
+                                                data-status="<%= f.status %>">
                                             Edit
                                         </button>
 
@@ -201,22 +211,22 @@
                         <div class="modal-body">
                             <form id="editFacilityForm" action="/updateFacility" method="POST">
                                 <input type="hidden" name="id" id="editFacilityId">
-                    
+
                                 <div class="form-group">
                                     <label for="editFacilityName">Facility Name</label>
                                     <input type="text" name="name" id="editFacilityName" required>
                                 </div>
-                    
+
                                 <div class="form-group">
                                     <label for="editFacilityType">Type</label>
                                     <input type="text" name="type" id="editFacilityType" required>
                                 </div>
-                    
+
                                 <div class="form-group">
                                     <label for="editFacilityCapacity">Capacity</label>
                                     <input type="number" name="capacity" id="editFacilityCapacity" required>
                                 </div>
-                    
+
                                 <div class="form-group">
                                     <label for="editFacilityStatus">Status</label>
                                     <select name="status" id="editFacilityStatus" required>
@@ -225,7 +235,7 @@
                                         <option value="Maintenance">Maintenance</option>
                                     </select>
                                 </div>
-                    
+
                                 <div class="modal-footer">
                                     <button type="submit" class="btn-primary">Save Changes</button>
                                     <button type="button" class="btn-secondary close-modal">Cancel</button>
